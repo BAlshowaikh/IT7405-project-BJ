@@ -11,6 +11,10 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+from pymongo import MongoClient
+from pymongo.errors import ConnectionFailure
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -76,21 +80,43 @@ WSGI_APPLICATION = 'core.wsgi.application'
 
 
 # Database
-# https://docs.djangoproject.com/en/3.2/ref/settings/#databases
+# The foloowing code will check if the remote mongodb is available
+# if so, it'll connect to it, otherwise it'll use the localhost as a db
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
+load_dotenv() # go to .env and locad the var inside it in the system env variables
 
+# Get the env variables, second arg is just a safe default, if the firts arg isn't found the second will applay
+ATLAS_URI = os.getenv("MONGODB_ATLAS_URI", "")
+LOCAL_URI = os.getenv("MONGODB_LOCAL_URI", "mongodb://localhost:27017/")
+
+# Create a function to check if remote db is avaibale
+def check_atlas_db(uri:str) -> bool:
+    if not uri:
+        return False
+    
+    try:
+        # MongoClient will take the uri and try to connect to the db
+        client = MongoClient(uri, serverSelectionTimeoutMS=2000)
+        client.server_info()   # ping the server
+        return True
+    except ConnectionFailure: 
+        return False
+
+# Check
+if check_atlas_db(ATLAS_URI):
+     ACTIVE_DB_URI = ATLAS_URI
+else:
+    ACTIVE_DB_URI = LOCAL_URI
+    print("⚠️ Falling back to LOCAL MongoDB (Atlas unreachable)")   
+
+
+# Connect to actual db
 DATABASES = {
     'default': {
         'ENGINE': 'djongo',
         'NAME': 'cohub_db',
         'CLIENT': {
-            'host': 'mongodb://localhost:27017/',
+            'host': ACTIVE_DB_URI,
         }
     }
 }
