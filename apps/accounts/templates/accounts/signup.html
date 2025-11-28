@@ -1,0 +1,107 @@
+{% extends "base_auth.html" %}
+
+{% block title %}Sign Up – CoHub{% endblock %}
+
+{% block content %}
+  <div class="bg-transparent">
+    {# Top error box for form-wide errors (e.g., password mismatch) #}
+    {% if form.non_field_errors %}
+      <div class="mb-4 rounded-md bg-red-500/10 border border-red-500/40 px-4 py-3 text-sm text-red-200">
+        {% for error in form.non_field_errors %}
+          <p>{{ error }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <form method="post" class="space-y-8">
+      {# It’s a Django template tag that inserts a hidden security token inside your form.This protects your website from CSRF attacks.#}
+      {# Django generates a random secret token for every user session. if it doesn't match, it rejects the request #}
+      {% csrf_token %}
+
+      {# Username #}
+      <div class="space-y-2">
+        <label for="id_username" class="block text-sm font-medium text-slate-100">
+          Username
+        </label>
+        <input
+          type="text"
+          name="username"
+          id="id_username"
+          value="{{ form.username.value|default_if_none:'' }}"
+          autocomplete="username"
+          class="block w-full rounded-md border border-slate-500/60 bg-white
+                 px-3 py-2 text-slate-900 text-sm
+                 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
+        />
+        {% if form.username.errors %}
+          <p class="text-xs text-red-300 mt-1">
+            {# this means how the first error message for the password1 field, because the error is a list#}
+            {{ form.username.errors.0 }}
+          </p>
+        {% endif %}
+      </div>
+
+      {# Password1 #}
+      <div class="space-y-2">
+        <label for="id_password1" class="block text-sm font-medium text-slate-100">
+          Password
+        </label>
+        <input
+          type="password"
+          name="password1"
+          id="id_password1"
+          autocomplete="new-password"
+          class="block w-full rounded-md border border-slate-500/60 bg-white
+                 px-3 py-2 text-slate-900 text-sm
+                 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
+        />
+        {% if form.password1.errors %}
+          <p class="text-xs text-red-300 mt-1">
+            {{ form.password1.errors.0 }}
+          </p>
+        {% endif %}
+      </div>
+
+      {# Password2 (confirmation) #}
+      <div class="space-y-2">
+        <label for="id_password2" class="block text-sm font-medium text-slate-100">
+          Confirm Password
+        </label>
+        <input
+          type="password"
+          name="password2"
+          id="id_password2"
+          autocomplete="new-password"
+          class="block w-full rounded-md border border-slate-500/60 bg-white
+                 px-3 py-2 text-slate-900 text-sm
+                 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
+        />
+        {% if form.password2.errors %}
+          <p class="text-xs text-red-300 mt-1">
+            {{ form.password2.errors.0 }}
+          </p>
+        {% endif %}
+      </div>
+
+      {# Sign Up button #}
+      <div class="pt-2">
+        <button
+          type="submit"
+          class="w-full rounded-md bg-sky-600 px-4 py-2.5 text-sm font-semibold
+                 text-white shadow-md hover:bg-sky-500
+                 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 focus:ring-offset-[#20222F]"
+        >
+          Sign Up
+        </button>
+      </div>
+    </form>
+
+    {# Footer link back to login #}
+    <p class="mt-8 text-center text-sm text-slate-200">
+      Already have an account?
+      <a href="{% url 'accounts:login' %}" class="font-semibold text-sky-400 hover:text-sky-300">
+        Login
+      </a>
+    </p>
+  </div>
+{% endblock %}

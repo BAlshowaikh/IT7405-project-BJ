@@ -1,0 +1,89 @@
+{# templates/accounts/login.html #}
+{% extends "base_auth.html" %}
+
+{% block title %}Login – CoHub{% endblock %}
+
+{% block content %}
+  <div class="bg-transparent">
+    {# Show non-field errors (e.g. "Invalid username/password") #}
+    {% if form.non_field_errors %}
+      <div class="mb-4 rounded-md bg-red-500/10 border border-red-500/40 px-4 py-3 text-sm text-red-200">
+        {% for error in form.non_field_errors %}
+          <p>{{ error }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <form method="post" class="space-y-8">
+      {% csrf_token %}
+
+      {# Preserve ?next=... for redirect after login #}
+      {% if request.GET.next %}
+        <input type="hidden" name="next" value="{{ request.GET.next }}">
+      {% endif %}
+
+      {# Username field #}
+      <div class="space-y-2">
+        <label for="id_username" class="block text-sm font-medium text-slate-100">
+          Username
+        </label>
+        <input
+          type="text"
+          name="username"
+          id="id_username"
+          value="{{ form.username.value|default_if_none:'' }}"
+          autocomplete="username"
+          class="block w-full rounded-md border border-slate-500/60 bg-white
+                 px-3 py-2 text-slate-900 text-sm
+                 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
+        />
+        {% if form.username.errors %}
+          <p class="text-xs text-red-300 mt-1">
+            {{ form.username.errors.0 }}
+          </p>
+        {% endif %}
+      </div>
+
+      {# Password field #}
+      <div class="space-y-2">
+        <label for="id_password" class="block text-sm font-medium text-slate-100">
+          Password
+        </label>
+        <input
+          type="password"
+          name="password"
+          id="id_password"
+          autocomplete="current-password"
+          class="block w-full rounded-md border border-slate-500/60 bg-white
+                 px-3 py-2 text-slate-900 text-sm
+                 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:border-sky-400"
+        />
+        {% if form.password.errors %}
+          <p class="text-xs text-red-300 mt-1">
+            {{ form.password.errors.0 }}
+          </p>
+        {% endif %}
+      </div>
+
+      {# Login button #}
+      <div class="pt-2">
+        <button
+          type="submit"
+          class="w-full rounded-md bg-sky-600 px-4 py-2.5 text-sm font-semibold
+                 text-white shadow-md hover:bg-sky-500
+                 focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 focus:ring-offset-[#20222F]"
+        >
+          Login
+        </button>
+      </div>
+    </form>
+
+    {# Footer link to signup #}
+    <p class="mt-8 text-center text-sm text-slate-200">
+      Don’t have an account?
+      <a href="{% url 'accounts:signup' %}" class="font-semibold text-sky-400 hover:text-sky-300">
+        Sign Up
+      </a>
+    </p>
+  </div>
+{% endblock %}

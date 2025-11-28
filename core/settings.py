@@ -63,8 +63,8 @@ ROOT_URLCONF = 'core.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
+        'DIRS': [BASE_DIR / 'templates'], #“In addition to each app’s templates folder,also look for templates in the folder /templates/ located in the project root.”
+        'APP_DIRS': True, #This will go and look for "templates" folder inside each app
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -120,8 +120,6 @@ DATABASES = {
         }
     }
 }
-
-
 
 # Password validation
 # https://docs.djangoproject.com/en/3.2/ref/settings/#auth-password-validators
