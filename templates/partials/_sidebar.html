@@ -1,0 +1,125 @@
+{# expects an optional "active_page" variable in context:
+   'home' | 'tasks' | 'inbox' | 'projects' | 'teams'
+#}
+
+<aside
+  class="flex h-screen w-64 flex-col bg-[#20222F] text-slate-100 border-r border-slate-800"
+>
+  {# Top logo + app name #}
+  <div class="flex items-center gap-3 px-6 py-5 border-b border-slate-800">
+    <img
+      src="https://via.placeholder.com/32x32"
+      alt="CoHub logo"
+      class="h-8 w-8 rounded-lg bg-slate-700 object-cover"
+    />
+    <span class="text-xl font-semibold tracking-wide">CoHub</span>
+  </div>
+
+  {# Main nav links #}
+  <nav class="mt-4 flex-1 flex flex-col gap-1 text-sm font-medium">
+    {# Home #}
+    <a
+      href="{% url 'projects:dashboard' %}"
+      class="group flex items-center gap-3 px-6 py-3 transition
+             hover:bg-slate-800/60
+             {% if active_page == 'home' %}
+               bg-white text-slate-900 rounded-r-full shadow-md
+             {% endif %}"
+    >
+      <iconify-icon
+        icon="solar:home-2-line-duotone"
+        class="text-lg
+               {% if active_page == 'home' %}text-slate-900{% else %}text-slate-300{% endif %}"
+      ></iconify-icon>
+      <span>Home</span>
+    </a>
+
+    {# My Tasks #}
+    <a
+      href="{% url 'tasks:list' %}"
+      class="group flex items-center gap-3 px-6 py-3 transition
+             hover:bg-slate-800/60
+             {% if active_page == 'tasks' %}
+               bg-white text-slate-900 rounded-r-full shadow-md
+             {% endif %}"
+    >
+      <iconify-icon
+        icon="solar:checklist-minimalistic-linear"
+        class="text-lg
+               {% if active_page == 'tasks' %}text-slate-900{% else %}text-slate-300{% endif %}"
+      ></iconify-icon>
+      <span>My Tasks</span>
+    </a>
+
+    {# Inbox #}
+    <a
+      href="{% url 'notifications:inbox' %}"
+      class="group flex items-center gap-3 px-6 py-3 transition
+             hover:bg-slate-800/60
+             {% if active_page == 'inbox' %}
+               bg-white text-slate-900 rounded-r-full shadow-md
+             {% endif %}"
+    >
+      <iconify-icon
+        icon="solar:inbox-unread-line-duotone"
+        class="text-lg
+               {% if active_page == 'inbox' %}text-slate-900{% else %}text-slate-300{% endif %}"
+      ></iconify-icon>
+      <span>Inbox</span>
+    </a>
+
+    <div class="mt-4 border-t border-slate-800 pt-3"></div>
+
+    {# Projects #}
+    <a
+      href="{% url 'projects:list' %}"
+      class="group flex items-center gap-3 px-6 py-3 transition
+             hover:bg-slate-800/60
+             {% if active_page == 'projects' %}
+               bg-white text-slate-900 rounded-r-full shadow-md
+             {% endif %}"
+    >
+      <iconify-icon
+        icon="solar:cube-outline"
+        class="text-lg
+               {% if active_page == 'projects' %}text-slate-900{% else %}text-slate-300{% endif %}"
+      ></iconify-icon>
+      <span>Projects</span>
+    </a>
+
+    {# Teams #}
+    <a
+      href="{% url 'projects:teams' %}"
+      class="group flex items-center gap-3 px-6 py-3 transition
+             hover:bg-slate-800/60
+             {% if active_page == 'teams' %}
+               bg-white text-slate-900 rounded-r-full shadow-md
+             {% endif %}"
+    >
+      <iconify-icon
+        icon="solar:users-group-rounded-outline"
+        class="text-lg
+               {% if active_page == 'teams' %}text-slate-900{% else %}text-slate-300{% endif %}"
+      ></iconify-icon>
+      <span>Teams</span>
+    </a>
+  </nav>
+
+  {# Sign out at bottom #}
+  <div class="border-t border-slate-800 px-6 py-4">
+    <form method="post" action="{% url 'accounts:logout' %}" class="w-full">
+      {% csrf_token %}
+      <button
+        type="submit"
+        class="flex w-full items-center gap-3 text-sm font-medium text-slate-300
+               hover:text-red-300 hover:bg-slate-800/70 rounded-md px-3 py-2 transition"
+      >
+        <iconify-icon
+          icon="solar:logout-2-linear"
+          class="text-lg"
+        ></iconify-icon>
+        <span>Sign out</span>
+      </button>
+    </form>
+  </div>
+</aside>

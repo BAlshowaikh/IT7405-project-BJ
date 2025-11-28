@@ -1,0 +1,35 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>{% block title %}CoHub{% endblock %}</title>
+
+    <!-- Tailwind via CDN (same as your auth pages, or move to static later) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Iconify web component (needed for <iconify-icon>) -->
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+  </head>
+  <body class="min-h-screen bg-slate-50 text-slate-900">
+    <div class="flex min-h-screen">
+      {# Sidebar #}
+      {% include "partials/_sidebar.html" %}
+
+      {# Main content area #}
+      <main class="flex-1 bg-slate-50">
+        <header class="h-16 border-b border-slate-200 flex items-center justify-end px-8 bg-white">
+          {# Placeholder top-right avatar, etc. #}
+          <div class="h-9 w-9 rounded-full bg-slate-200 flex items-center justify-center">
+            <iconify-icon icon="solar:user-circle-line-duotone" class="text-xl text-slate-500"></iconify-icon>
+          </div>
+        </header>
+
+        <section class="p-8">
+          {% block content %}{% endblock %}
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
