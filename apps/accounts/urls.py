@@ -13,8 +13,8 @@ app_name = "accounts"
 # NOTE NO2: The "as_view()" method converts the Views (because they are classes in general) into a callable function 
 # that will fire whenever the path is being visited
 
-# NOTE NO3: nstead of hardcoding the URL path (like /accounts/signup/) in your 
-# templates and views, you use this nickname (like "signup").
+# NOTE NO3: Instead of hardcoding the URL path (like /accounts/signup/) in your 
+# templates and views, you use this nickname "name" (like "signup").
 urlpatterns = [
     path("signup/", SignUpView.as_view(), name="signup"),
     path("login/", SignInView.as_view(), name="login"),

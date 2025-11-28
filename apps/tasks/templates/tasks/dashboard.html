@@ -1,0 +1,23 @@
+{% extends "base_app.html" %}
+
+{% block title %}My Tasks Dashboard – CoHub{% endblock %}
+
+{% block content %}
+  <div class="space-y-6">
+    <header>
+      <h1 class="text-2xl font-bold text-slate-900">
+        My Tasks Dashboard
+      </h1>
+      <p class="mt-1 text-sm text-slate-500">
+        Welcome back, {{ username }} 👋
+      </p>
+    </header>
+
+    {# placeholder area where later you’ll add stats cards, task table, etc. #}
+    <div class="mt-6 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <p class="text-sm text-slate-500">
+        This is your dashboard shell. Later we’ll add Week’s Statistics and All Tasks here.
+      </p>
+    </div>
+  </div>
+{% endblock %}
