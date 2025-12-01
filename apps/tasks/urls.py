@@ -16,7 +16,7 @@ urlpatterns = [
     path("api/tasks/create/", views.TaskCreateApiView.as_view(), name="api_create"),
 
     # # Show single task's details
-    # path("api/tasks/<str:pk>/", views.TaskDetailApiView.as_view(), name="api_detail"),
+    path("api/tasks/<str:pk>/", views.TaskDetailApiView.as_view(), name="api_detail"),
 
     # # Update a task
     # path("api/tasks/<str:pk>/update/", views.TaskUpdateApiView.as_view(), name="api_update"),
