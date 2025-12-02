@@ -117,6 +117,7 @@
 
   const openDetailsPanel = () => {
     if (!detailsPanel) return;
+    // Panel starts with translate-x-full (hidden offscreen)
     detailsPanel.classList.remove("translate-x-full");
   };
 
@@ -133,6 +134,7 @@
     });
   }
 
+  // Small helpers to style the pills inside the modal
   const setStatusPillElement = (el, status) => {
     if (!el) return;
 
@@ -267,7 +269,7 @@
   };
 
   // ---------------- Render & load functions ----------------
-    const renderTasks = (tasks) => {
+  const renderTasks = (tasks) => {
     if (!tableBody) return;
 
     tableBody.innerHTML = "";
@@ -286,7 +288,7 @@
       .map((task) => {
         return `
           <tr data-task-id="${task.id}"
-              class="border-t border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer">
+              class="hover:bg-slate-50 cursor-pointer">
             <td class="px-6 py-3 text-slate-800">
               <div class="flex items-center gap-3">
                 <input
@@ -384,6 +386,32 @@
         errorEl.classList.remove("hidden")
       }
     })
+  }
+
+  const handleTableBodyClick = (event) => {
+    if (!tableBody) return;
+
+    // Ignore clicks on checkboxes (for later complete-toggle)
+    if (event.target.closest("input[type='checkbox']")) {
+      return;
+    }
+
+    const row = event.target.closest("tr[data-task-id]");
+    if (!row) return;
+
+    const taskId = row.getAttribute("data-task-id");
+    console.log("[handleTableBodyClick] clicked taskId:", taskId);
+
+    if (!taskId) {
+      console.warn("Row has no valid task id");
+      return;
+    }
+    openTaskDetailsById(taskId);
+  };
+
+
+  if (tableBody) {
+    tableBody.addEventListener("click", handleTableBodyClick);
   }
 })()
 
