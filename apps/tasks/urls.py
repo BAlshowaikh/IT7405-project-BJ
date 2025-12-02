@@ -24,6 +24,6 @@ urlpatterns = [
     # # Change status from the list directly
     # path("api/tasks/<str:pk>/status/", views.TaskStatusApiView.as_view(), name="api_status"),
 
-    # # Delete a task
-    # path("api/tasks/<str:pk>/delete/", views.TaskDeleteApiView.as_view(), name="api_delete"),
+    # Delete a task
+    path("api/tasks/<str:public_id>/delete/", views.TaskDeleteApiView.as_view(), name="api_delete"),
 ]

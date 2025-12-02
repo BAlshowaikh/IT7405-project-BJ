@@ -7,6 +7,13 @@
   const errorEl = document.getElementById("add-task-error");
   const tableBody = document.getElementById("tasks-table-body");
 
+    // ------- Task details elements -------
+  const taskDetailsPanel = document.getElementById("task-details-panel");
+  const taskDetailsTaskIdInput = document.getElementById("task-details-task-id");
+  const taskDetailsDeleteBtn = document.getElementById("task-details-delete-btn");
+  const markCompleteBtn = document.getElementById("task-details-mark-complete");
+
+
   // read URLs from data attributes (fallback to hard-coded)
   const root = document.getElementById("tasks-dashboard-root");
   const createUrl =
@@ -179,34 +186,63 @@
     }
   };
 
-  const renderTaskDetails = (task) => {
-    currentTaskId = task.id;
-    currentTaskData = task;
+const renderTaskDetails = (task) => {
+  if (!task) return;
 
-    if (detailsTitleEl) {
-      detailsTitleEl.textContent = task.title || "";
+  // 🔹 Keep track of the currently opened task
+  currentTaskId = task.id;          // this is your public_id from backend
+  currentTaskData = task;
+
+  // Optional: also sync hidden input (useful for debugging or other handlers)
+  if (taskDetailsTaskIdInput) {
+    taskDetailsTaskIdInput.value = task.id || "";
+  }
+
+  // ----- Title -----
+  if (detailsTitleEl) {
+    detailsTitleEl.textContent = task.title || "";
+  }
+
+  // ----- Description -----
+  if (detailsDescriptionEl) {
+    const desc = task.description || "";
+    detailsDescriptionEl.textContent =
+      desc.trim().length > 0 ? desc : "No description.";
+  }
+
+  // ----- Status + Priority pills -----
+  setStatusPillElement(detailsStatusPillEl, task.status);
+  setPriorityPillElement(detailsPriorityPillEl, task.priority);
+
+  // ----- Due date -----
+  if (detailsDueDateEl) {
+    if (task.due_date) {
+      detailsDueDateEl.textContent = `Due: ${task.due_date}`;
+    } else {
+      detailsDueDateEl.textContent = "No due date";
     }
+  }
 
-    if (detailsDescriptionEl) {
-      const desc = task.description || "";
-      detailsDescriptionEl.textContent =
-        desc.trim().length > 0 ? desc : "No description.";
+  // ----- Mark as complete button label -----
+  if (markCompleteBtn) {
+    if (task.status === "done") {
+      markCompleteBtn.textContent = "Completed";
+      markCompleteBtn.disabled = true;
+      markCompleteBtn.classList.remove("bg-emerald-500", "hover:bg-emerald-400");
+      markCompleteBtn.classList.add("bg-emerald-700", "cursor-default");
+    } else {
+      markCompleteBtn.textContent = "Mark as Complete";
+      markCompleteBtn.disabled = false;
+      markCompleteBtn.classList.add("bg-emerald-500");
+      markCompleteBtn.classList.remove("bg-emerald-700", "cursor-default");
     }
+  }
 
-    setStatusPillElement(detailsStatusPillEl, task.status);
-    setPriorityPillElement(detailsPriorityPillEl, task.priority);
+  // Finally, open the slide-over panel
+  openDetailsPanel();
+}
 
-    if (detailsDueDateEl) {
-      if (task.due_date) {
-        detailsDueDateEl.textContent = `Due: ${task.due_date}`;
-      } else {
-        detailsDueDateEl.textContent = "No due date";
-      }
-    }
-
-    openDetailsPanel();
-  };
-
+  
   const openTaskDetailsById = async (taskId) => {
     if (!taskId || !detailBaseUrl) return;
 
@@ -409,9 +445,56 @@
     openTaskDetailsById(taskId);
   };
 
+  // --------------- Handle the Delete icon clicks
+  const handleDeleteTaskClick = async () => {
+    if (!taskDetailsTaskIdInput) return;
+
+    const taskId = taskDetailsTaskIdInput.value;
+    if (!taskId) {
+      console.warn("[delete] No task id found in details modal");
+      return;
+    }
+
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this task? This action cannot be undone."
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/tasks/api/tasks/${taskId}/delete/`, {
+        method: "DELETE",
+        headers: {
+          "X-CSRFToken": getCsrfToken(),
+          "X-Requested-With": "XMLHttpRequest",
+        },
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok || data.ok === false) {
+        console.error("Failed to delete task", response.status, data);
+        alert("Could not delete the task. Please try again.");
+        return;
+      }
+
+      // Success: close details panel & reload tasks
+      closeDetailsPanel();
+      await loadTasks(currentStatusFilter);
+    } catch (err) {
+      console.error("Error deleting task", err);
+      alert("Network error while deleting the task. Please try again.");
+    }
+  };
 
   if (tableBody) {
     tableBody.addEventListener("click", handleTableBodyClick);
   }
+
+  if (taskDetailsDeleteBtn) {
+    taskDetailsDeleteBtn.addEventListener("click", handleDeleteTaskClick);
+  }
+
 })()
 
