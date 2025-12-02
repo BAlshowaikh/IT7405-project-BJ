@@ -39,24 +39,16 @@ def task_query_for_user(user):
 #     """
 #     # Simple, Djongo-friendly query: WHERE created_by_id = user.id AND pk = pk
 #     return get_object_or_404(Task, pk=pk, created_by=user)
-def get_task_for_user_or_404(user, identifier: str) -> Task:
-    print("inside get_task_for_user_or_404")
-    print(f"identifier is: {identifier}")
+def get_task_for_user_or_404(user, public_id: str) -> Task:
     """
-    Fetch a single task created by this user, matching our custom identifier.
-
-    Since Djongo isn't giving us a reliable pk, we:
-    - filter by created_by=user (security)
-    - iterate in Python and compare the custom identifier (based on Mongo _id)
+    Fetch a single task created by this user, matching the uniquli created public id.
     """
     # You said: for now you only care about tasks created_by the user
-    qs = Task.objects.filter(created_by=user)
-
-    for task in qs:
-        if get_task_identifier(task) == identifier:
-            return task
-
-    raise Http404("Task not found")
+    # qs = Task.objects.filter(created_by=user)
+    try:
+        return Task.objects.get(created_by=user, public_id=public_id)
+    except Task.DoesNotExist:
+        raise Http404("Task not found")
 
 
 def parse_request_data(request):
@@ -125,7 +117,7 @@ def serialize_task(task: Task):
     task_id = get_task_identifier(task)
 
     return {
-        "id": task_id,
+        "id": task.public_id,
         "title": task.title,
         "description": task.description,
         "task_type": task.task_type,
@@ -274,22 +266,52 @@ class TaskCreateApiView(LoginRequiredMixin, View):
         )
 
 
-# class TaskListApiView(LoginRequiredMixin, View):
-#     """
-#     GET /tasks/api/tasks/
-#     Return a JSON list of tasks, only those created by the current user,
-#     with optional status + search filters.
-#     """
+class TaskListApiView(LoginRequiredMixin, View):
+    """
+    GET /tasks/api/tasks/
+    Return all tasks created by the current user, optionally filtered
+    by status and search query, ordered by due_date then created_at.
+    """
 
+    def get(self, request):
+        user = request.user
+
+        # Start from tasks created by this user only
+        qs = Task.objects.filter(created_by=user)
+
+        # Optional filters
+        status = request.GET.get("status")
+        query = request.GET.get("q")
+
+        # Filter by status if it's a valid choice
+        if status in dict(Task.STATUS_CHOICES):
+            qs = qs.filter(status=status)
+
+        # Simple title search
+        if query:
+            qs = qs.filter(Q(title__icontains=query))
+
+        # Order by due_date then newest created_at
+        qs = qs.order_by("due_date", "-created_at")
+
+        # Serialize tasks (this now uses task.public_id as "id")
+        tasks_data = [serialize_task(task) for task in qs]
+
+        return JsonResponse(
+            {
+                "tasks": tasks_data,
+                "count": len(tasks_data),
+            }
+        )
+
+# class TaskListApiView(LoginRequiredMixin, View):
 #     def get(self, request):
 #         user = request.user
 
-#         # 🔹 Only tasks created by this user
-#         qs = task_query_for_user(user)
+#         qs = Task.objects.filter(created_by=user)
 
-#         # Filters from query params
-#         status = request.GET.get("status")  # "todo", "done", etc.
-#         query = request.GET.get("q")  # search text
+#         status = request.GET.get("status")
+#         query = request.GET.get("q")
 
 #         if status in dict(Task.STATUS_CHOICES):
 #             qs = qs.filter(status=status)
@@ -297,8 +319,18 @@ class TaskCreateApiView(LoginRequiredMixin, View):
 #         if query:
 #             qs = qs.filter(Q(title__icontains=query))
 
-#         # Order by due_date then -created_at
 #         qs = qs.order_by("due_date", "-created_at")
+
+#         # 🔹 DEBUG: inspect 1–2 tasks
+#         for t in qs[:2]:
+#             print("=== DEBUG RAW TASK ===")
+#             print("repr:", repr(t))
+#             print("pk:", t.pk)
+#             print("has attr id:", hasattr(t, "id"), "value:", getattr(t, "id", None))
+#             print("has attr _id:", hasattr(t, "_id"), "value:", getattr(t, "_id", None))
+#             print("dict keys:", list(t.__dict__.keys()))
+#             print("dict['_id']:", t.__dict__.get("_id"))
+#             print("dict['id']:", t.__dict__.get("id"))
 
 #         tasks_data = [serialize_task(task) for task in qs]
 
@@ -308,42 +340,6 @@ class TaskCreateApiView(LoginRequiredMixin, View):
 #                 "count": len(tasks_data),
 #             }
 #         )
-class TaskListApiView(LoginRequiredMixin, View):
-    def get(self, request):
-        user = request.user
-
-        qs = Task.objects.filter(created_by=user)
-
-        status = request.GET.get("status")
-        query = request.GET.get("q")
-
-        if status in dict(Task.STATUS_CHOICES):
-            qs = qs.filter(status=status)
-
-        if query:
-            qs = qs.filter(Q(title__icontains=query))
-
-        qs = qs.order_by("due_date", "-created_at")
-
-        # 🔹 DEBUG: inspect 1–2 tasks
-        for t in qs[:2]:
-            print("=== DEBUG RAW TASK ===")
-            print("repr:", repr(t))
-            print("pk:", t.pk)
-            print("has attr id:", hasattr(t, "id"), "value:", getattr(t, "id", None))
-            print("has attr _id:", hasattr(t, "_id"), "value:", getattr(t, "_id", None))
-            print("dict keys:", list(t.__dict__.keys()))
-            print("dict['_id']:", t.__dict__.get("_id"))
-            print("dict['id']:", t.__dict__.get("id"))
-
-        tasks_data = [serialize_task(task) for task in qs]
-
-        return JsonResponse(
-            {
-                "tasks": tasks_data,
-                "count": len(tasks_data),
-            }
-        )
 
 
 

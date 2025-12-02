@@ -1,11 +1,19 @@
 from django.db import models
 from django.contrib.auth import get_user_model
 from apps.projects.models import Project
+import uuid
 
 User = get_user_model()
 
 
 class Task(models.Model):
+    # This will generated a public id (not the same as the id in db) which will be used for details, edit and delete
+    public_id = models.CharField(
+        max_length=36,
+        unique=True,
+        default=uuid.uuid4,  # auto-generate on create # type: ignore
+        editable=False,
+    )
     # --- task type ---
     TYPE_PERSONAL = "personal"
     TYPE_PROJECT = "project"
