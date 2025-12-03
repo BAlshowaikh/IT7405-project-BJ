@@ -65,6 +65,46 @@
   if (cancelBtn) cancelBtn.addEventListener("click", closePanel);
 
   // ---------------- Small helpers for pills (table) ----------------
+
+  // Function for tabs in the table 
+  const statusTabsContainer = document.getElementById("task-status-tabs");
+
+  const setActiveStatusTab = (status) => {
+    if (!statusTabsContainer) return;
+
+    const buttons = statusTabsContainer.querySelectorAll("[data-status]");
+
+    buttons.forEach((btn) => {
+      const btnStatus = btn.getAttribute("data-status");
+
+      if (btnStatus === status) {
+        btn.classList.add("border-b-2", "border-sky-500", "text-slate-900", "font-medium");
+        btn.classList.remove("text-slate-500");
+      } else {
+        btn.classList.remove("border-b-2", "border-sky-500", "text-slate-900", "font-medium");
+        btn.classList.add("text-slate-500");
+      }
+    });
+  };
+
+  if (statusTabsContainer) {
+    statusTabsContainer.addEventListener("click", (event) => {
+      const clicked = event.target.closest("[data-status]");
+      if (!clicked) return;
+
+      const newStatus = clicked.getAttribute("data-status") || "all";
+
+      // update global
+      currentStatusFilter = newStatus;
+
+      // update tabs appearance
+      setActiveStatusTab(newStatus);
+
+      // reload tasks with filter
+      loadTasks(newStatus);
+    });
+  }
+
   function priorityPillHtml(priority) {
     if (priority === "high") {
       return `
@@ -412,6 +452,10 @@ const renderTaskDetails = (task) => {
   // Attach handlers to any server-rendered rows (before/if API load fails)
   attachTaskRowClickHandlers();
 
+  // Attach a function to check for the status (tabs in the table)
+  setActiveStatusTab(currentStatusFilter);
+
+
   // ---------------- Form submit (create task) ----------------
   if (form) {
     form.addEventListener("submit", async (event) => {
@@ -465,7 +509,7 @@ const renderTaskDetails = (task) => {
     if (!row) return;
 
     const taskId = row.getAttribute("data-task-id");
-    console.log("[handleTableBodyClick] clicked taskId:", taskId);
+    // console.log("[handleTableBodyClick] clicked taskId:", taskId);
 
     if (!taskId) {
       console.warn("Row has no valid task id");
@@ -563,7 +607,7 @@ const renderTaskDetails = (task) => {
   };
 
   const openEditPanelForTask = (task) => {
-    console.log("[edit] openEditPanelForTask called with:", task);
+    // console.log("[edit] openEditPanelForTask called with:", task);
 
     // 🔹 Always query fresh from DOM (in case earlier const was null)
     const panelEl = document.getElementById("edit-task-panel");
@@ -575,15 +619,15 @@ const renderTaskDetails = (task) => {
     const statusSelectEl = document.getElementById("edit-task-status");
     const errorEl = document.getElementById("edit-task-error");
 
-    console.log("[edit] DOM refs", {
-      panelEl,
-      idInputEl,
-      titleInputEl,
-      descInputEl,
-      dueDateInputEl,
-      prioritySelectEl,
-      errorEl,
-    });
+    // console.log("[edit] DOM refs", {
+    //   panelEl,
+    //   idInputEl,
+    //   titleInputEl,
+    //   descInputEl,
+    //   dueDateInputEl,
+    //   prioritySelectEl,
+    //   errorEl,
+    // });
 
     if (!task) {
       console.warn("[edit] No task passed into openEditPanelForTask");
@@ -627,7 +671,7 @@ const renderTaskDetails = (task) => {
 
     // 🔹 Slide in (remove translate-x-full so it appears)
     panelEl.classList.remove("translate-x-full");
-    console.log("[edit] Removed translate-x-full from edit-task-panel");
+    // console.log("[edit] Removed translate-x-full from edit-task-panel");
   };
 
 
@@ -659,22 +703,22 @@ const renderTaskDetails = (task) => {
   //   openEditPanelForTask(currentTaskData);
   // };
     const handleDetailsEditClick = async () => {
-    console.log("[edit] Edit button clicked");
+    // console.log("[edit] Edit button clicked");
 
     // 1) Prefer the hidden input inside the details modal
     const hiddenId = taskDetailsTaskIdInput ? taskDetailsTaskIdInput.value : "";
     const taskId = hiddenId || currentTaskId;
 
-    console.log("[edit] taskId from hidden/current:", { hiddenId, currentTaskId, taskId });
+    // console.log("[edit] taskId from hidden/current:", { hiddenId, currentTaskId, taskId });
 
     if (!taskId) {
-      console.warn("[edit] No task id available for edit");
+      // console.warn("[edit] No task id available for edit");
       return;
     }
 
     // 2) If we have a cached task for this id, use it
     if (currentTaskData && currentTaskData.id === taskId) {
-      console.log("[edit] Using cached currentTaskData");
+      // console.log("[edit] Using cached currentTaskData");
       closeDetailsPanel();
       openEditPanelForTask(currentTaskData);
       return;
@@ -682,7 +726,7 @@ const renderTaskDetails = (task) => {
 
     // 3) Otherwise, fetch fresh details from the API
     const url = `${detailBaseUrl}${taskId}/`;
-    console.log("[edit] Fetching task for edit from:", url);
+    // console.log("[edit] Fetching task for edit from:", url);
 
     try {
       const response = await fetch(url, {
