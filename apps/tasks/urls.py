@@ -15,15 +15,18 @@ urlpatterns = [
     # Create a new task
     path("api/tasks/create/", views.TaskCreateApiView.as_view(), name="api_create"),
 
-    # # Show single task's details
+    # Show single task's details
     path("api/tasks/<str:pk>/", views.TaskDetailApiView.as_view(), name="api_detail"),
 
-    # # Update a task
-    # path("api/tasks/<str:pk>/update/", views.TaskUpdateApiView.as_view(), name="api_update"),
+    # Update the task status to complete
+    path("api/tasks/<str:public_id>/complete/",views.TaskMarkCompleteApiView.as_view(), name="api_mark_complete",),
+
+    # Update a task
+    path("api/tasks/<str:public_id>/update/", views.TaskUpdateApiView.as_view(), name="api_update"),
 
     # # Change status from the list directly
     # path("api/tasks/<str:pk>/status/", views.TaskStatusApiView.as_view(), name="api_status"),
 
     # Delete a task
-    path("api/tasks/<str:public_id>/delete/", views.TaskDeleteApiView.as_view(), name="api_delete"),
+    # path("api/tasks/<str:public_id>/delete/", views.TaskDeleteApiView.as_view(), name="api_delete"),
 ]

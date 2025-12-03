@@ -32,13 +32,6 @@ def task_query_for_user(user):
     return Task.objects.filter(created_by=user)
 
 
-# def get_task_for_user_or_404(user, pk):
-#     """
-#     Fetch a single task created by this user.
-#     Raises 404 if the task doesn't exist or isn't created by this user.
-#     """
-#     # Simple, Djongo-friendly query: WHERE created_by_id = user.id AND pk = pk
-#     return get_object_or_404(Task, pk=pk, created_by=user)
 def get_task_for_user_or_404(user, public_id: str) -> Task:
     """
     Fetch a single task created by this user, matching the uniquli created public id.
@@ -167,7 +160,7 @@ class DashboardView(LoginRequiredMixin, TemplateView):
             due_date = task.due_date
 
             if created_date and start_of_week <= created_date <= today:
-                if task.status == Task.STATUS_IN_PROGRESS:
+                if task.status == Task.STATUS_TODO:
                     tasks_in_progress_this_week += 1
                 elif task.status == Task.STATUS_DONE:
                     tasks_completed_this_week += 1
@@ -325,121 +318,127 @@ class TaskDetailApiView(LoginRequiredMixin, View):
                 "task": task_data,
             }
         )
-    
-# ----------------- Delete a task
-# class TaskDeleteApiView(LoginRequiredMixin, View):
-#     """
-#     DELETE /tasks/api/tasks/<public_id>/delete/
-#     Delete a single task created by the current user.
-#     """
 
-#     http_method_names = ["delete"]
-
-#     def delete(self, request, public_id, *args, **kwargs):
-#         # Only allow deleting tasks created by this user
-#         task = get_object_or_404(Task, created_by=request.user, public_id=public_id)
-
-#         task.delete()
-
-#         return JsonResponse(
-#             {
-#                 "ok": True,
-#                 "message": "Task deleted successfully.",
-#             }
-#         )
-
-# class TaskDeleteApiView(LoginRequiredMixin, View):
-#     """
-#     DELETE /tasks/api/tasks/<public_id>/delete/
-#     Delete a single task created by the current user.
-#     """
-
-#     http_method_names = ["delete", "post"]  # optional: allow POST as delete
-
-#     def delete(self, request, public_id=None, pk=None, *args, **kwargs):
-#         # Accept either ?public_id= or ?pk= from the URL
-#         identifier = public_id or pk
-
-#         if not identifier:
-#             return JsonResponse(
-#                 {"ok": False, "error": "Missing task identifier."},
-#                 status=400,
-#             )
-
-#         qs = Task.objects.filter(created_by=request.user, public_id=identifier)
-
-#         if not qs.exists():
-#             return JsonResponse(
-#                 {"ok": False, "error": "Task not found."},
-#                 status=404,
-#             )
-
-#         deleted_count, _ = qs.delete()  # no pk assertion here
-
-#         return JsonResponse(
-#             {
-#                 "ok": True,
-#                 "deleted": deleted_count,
-#                 "message": "Task deleted successfully.",
-#             }
-#         )
-
-#         return JsonResponse(
-#             {
-#                 "ok": True,
-#                 "message": "Task deleted successfully.",
-#             }
-#         )
-
-#     # Optional: treat POST as delete (if you ever need it)
-#     def post(self, request, public_id=None, pk=None, *args, **kwargs):
-#         return self.delete(request, public_id=public_id, pk=pk, *args, **kwargs)
-
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import JsonResponse
-from django.views import View
-
-from .models import Task
-
-
-class TaskDeleteApiView(LoginRequiredMixin, View):
+class TaskMarkCompleteApiView(LoginRequiredMixin, View):
     """
-    DELETE /tasks/api/tasks/<public_id>/delete/
-    Delete a single task created by the current user.
+    POST /tasks/api/tasks/<public_id>/complete/
+    From any status → mark as done (one-way).
     """
 
-    http_method_names = ["delete", "post"]  # POST optional
+    http_method_names = ["post"]
 
-    def delete(self, request, public_id=None, pk=None, *args, **kwargs):
-        # Handle both URL param names: <str:public_id> or <str:pk>
-        identifier = public_id or pk
+    def post(self, request, public_id, *args, **kwargs):
+        user = request.user
 
-        if not identifier:
-          return JsonResponse(
-              {"ok": False, "error": "Missing task identifier."},
-              status=400,
-          )
+        qs = Task.objects.filter(created_by=user, public_id=public_id)
+        row = qs.values("status").first()
 
-        # Use QuerySet.delete() to avoid pk=None assertion on the instance
-        qs = Task.objects.filter(created_by=request.user, public_id=identifier)
-
-        if not qs.exists():
+        if not row:
             return JsonResponse(
                 {"ok": False, "error": "Task not found."},
                 status=404,
             )
 
-        deleted_count, _ = qs.delete()  # 🔹 no pk assertion here
+        current_status = row["status"]
+
+        # If already done, just return the current task
+        if current_status == Task.STATUS_DONE:
+            task = qs.first()
+            return JsonResponse(
+                {
+                    "ok": True,
+                    "task": serialize_task(task), # type: ignore
+                }
+            )
+
+        # Otherwise: mark as done + set completed_at
+        now = timezone.now()
+        qs.update(status=Task.STATUS_DONE, completed_at=now)
+
+        updated_task = qs.first()
 
         return JsonResponse(
             {
                 "ok": True,
-                "deleted": deleted_count,
-                "message": "Task deleted successfully.",
+                "task": serialize_task(updated_task), # type: ignore
+            }
+        )
+    
+#--------------------- Update a Task
+class TaskUpdateApiView(LoginRequiredMixin, View):
+    """
+    POST /tasks/api/tasks/<public_id>/update/
+    Update selected fields of a task created by the current user.
+    """
+
+    http_method_names = ["post"]
+
+    def post(self, request, public_id, *args, **kwargs):
+        user = request.user
+        data = parse_request_data(request)
+
+        qs = Task.objects.filter(created_by=user, public_id=public_id)
+        task = qs.first()
+
+        if not task:
+            return JsonResponse(
+                {"success": False, "errors": {"__all__": "Task not found."}},
+                status=404,
+            )
+
+        # ----- Title (required) -----
+        title = (data.get("title") or "").strip()
+        if not title:
+            return JsonResponse(
+                {
+                    "success": False,
+                    "errors": {"title": "This field is required."},
+                },
+                status=400,
+            )
+
+        # ----- Optional fields -----
+        description = (data.get("description") or "").strip()
+
+        priority = data.get("priority") or task.priority
+        if priority not in dict(Task.PRIORITY_CHOICES):
+            priority = task.priority
+
+        status = data.get("status") or task.status
+        if status not in dict(Task.STATUS_CHOICES):
+            status = task.status
+
+        raw_due = data.get("due_date")
+        if raw_due:
+            try:
+                due_date = datetime.date.fromisoformat(raw_due)
+            except ValueError:
+                return JsonResponse(
+                    {
+                        "success": False,
+                        "errors": {"due_date": "Invalid date format. Use YYYY-MM-DD."},
+                    },
+                    status=400,
+                )
+        else:
+            due_date = None
+
+        # ----- Apply update -----
+        qs.update(
+            title=title,
+            description=description,
+            priority=priority,
+            status=status,
+            due_date=due_date,
+        )
+
+        updated_task = qs.first()
+
+        return JsonResponse(
+            {
+                "success": True,
+                "task": serialize_task(updated_task), # type: ignore
             }
         )
 
-    def post(self, request, public_id=None, pk=None, *args, **kwargs):
-        # Optional: allow POST to behave as delete
-        return self.delete(request, public_id=public_id, pk=pk, *args, **kwargs)
 

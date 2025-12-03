@@ -27,7 +27,7 @@
                flex items-center justify-between shadow-md"
       >
         <div>
-          <p class="text-sm text-slate-300 mb-1">Tasks In Progress</p>
+          <p class="text-sm text-slate-300 mb-1">Tasks To Do</p>
           <p class="text-3xl font-bold">{{ tasks_in_progress_this_week }}</p>
         </div>
         <div class="flex items-center justify-center w-10 h-10 rounded-full bg-slate-800/70">
@@ -183,6 +183,7 @@
 
 {% include "tasks/_add_task_panel.html" %}
 {% include "tasks/_task_details_panel.html" %}
+{% include "tasks/_edit_task_panel.html" %}
 {% endblock %}
 
 {% block extra_scripts %}

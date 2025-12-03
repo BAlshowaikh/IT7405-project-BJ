@@ -13,6 +13,19 @@
   const taskDetailsDeleteBtn = document.getElementById("task-details-delete-btn");
   const markCompleteBtn = document.getElementById("task-details-mark-complete");
 
+    // ------- Edit Task panel elements -------
+  const editPanel = document.getElementById("edit-task-panel");
+  const editForm = document.getElementById("edit-task-form");
+  const editErrorEl = document.getElementById("edit-task-error");
+  const editTaskIdInput = document.getElementById("edit-task-id");
+  const editTitleInput = document.getElementById("edit-task-title");
+  const editDescriptionInput = document.getElementById("edit-task-description");
+  const editDueDateInput = document.getElementById("edit-task-due-date");
+  const editPrioritySelect = document.getElementById("edit-task-priority");
+  const editCloseBtn = document.getElementById("close-edit-task");
+  const editCancelBtn = document.getElementById("cancel-edit-task");
+  const editStatusSelect = document.getElementById("edit-task-status");
+
 
   // read URLs from data attributes (fallback to hard-coded)
   const root = document.getElementById("tasks-dashboard-root");
@@ -488,6 +501,293 @@ const renderTaskDetails = (task) => {
     }
   };
 
+  // --------------- Handle the edit panel
+  //   const toDateInputValue = (isoString) => {
+  //   if (!isoString) return "";
+  //   // "2025-11-30" or "2025-11-30T00:00:00Z"
+  //   return isoString.slice(0, 10);
+  // };
+
+  // const openEditPanelForTask = (task) => {
+  //   if (!task || !editPanel) return;
+
+  //   // Fill hidden id with public_id
+  //   if (editTaskIdInput) {
+  //     editTaskIdInput.value = task.id || "";
+  //   }
+
+  //   if (editTitleInput) {
+  //     editTitleInput.value = task.title || "";
+  //   }
+
+  //   if (editDescriptionInput) {
+  //     editDescriptionInput.value = task.description || "";
+  //   }
+
+  //   if (editDueDateInput) {
+  //     editDueDateInput.value = toDateInputValue(task.due_date);
+  //   }
+
+  //   if (editPrioritySelect) {
+  //     editPrioritySelect.value = task.priority || "mid";
+  //   }
+
+  //   if (editErrorEl) {
+  //     editErrorEl.classList.add("hidden");
+  //     editErrorEl.textContent = "";
+  //   }
+
+  //   // Slide in
+  //   editPanel.classList.remove("translate-x-full");
+  // };
+    const toDateInputValue = (isoString) => {
+    if (!isoString) return "";
+    // "2025-11-30" or "2025-11-30T00:00:00Z"
+    return isoString.slice(0, 10);
+  };
+
+  const openEditPanelForTask = (task) => {
+    console.log("[edit] openEditPanelForTask called with:", task);
+
+    // 🔹 Always query fresh from DOM (in case earlier const was null)
+    const panelEl = document.getElementById("edit-task-panel");
+    const idInputEl = document.getElementById("edit-task-id");
+    const titleInputEl = document.getElementById("edit-task-title");
+    const descInputEl = document.getElementById("edit-task-description");
+    const dueDateInputEl = document.getElementById("edit-task-due-date");
+    const prioritySelectEl = document.getElementById("edit-task-priority");
+    const statusSelectEl = document.getElementById("edit-task-status");
+    const errorEl = document.getElementById("edit-task-error");
+
+    console.log("[edit] DOM refs", {
+      panelEl,
+      idInputEl,
+      titleInputEl,
+      descInputEl,
+      dueDateInputEl,
+      prioritySelectEl,
+      errorEl,
+    });
+
+    if (!task) {
+      console.warn("[edit] No task passed into openEditPanelForTask");
+      return;
+    }
+
+    if (!panelEl) {
+      console.error("[edit] No element with id='edit-task-panel' found");
+      return;
+    }
+
+    // Fill hidden id with public_id
+    if (idInputEl) {
+      idInputEl.value = task.id || "";
+    }
+
+    if (titleInputEl) {
+      titleInputEl.value = task.title || "";
+    }
+
+    if (descInputEl) {
+      descInputEl.value = task.description || "";
+    }
+
+    if (dueDateInputEl) {
+      dueDateInputEl.value = toDateInputValue(task.due_date);
+    }
+
+    if (prioritySelectEl) {
+      prioritySelectEl.value = task.priority || "mid";
+    }
+
+    if (statusSelectEl) {
+    statusSelectEl.value = task.status || "todo";
+    }
+
+    if (errorEl) {
+      errorEl.classList.add("hidden");
+      errorEl.textContent = "";
+    }
+
+    // 🔹 Slide in (remove translate-x-full so it appears)
+    panelEl.classList.remove("translate-x-full");
+    console.log("[edit] Removed translate-x-full from edit-task-panel");
+  };
+
+
+  const closeEditPanel = () => {
+    if (!editPanel) return;
+
+    editPanel.classList.add("translate-x-full");
+
+    if (editForm) {
+      editForm.reset();
+    }
+    if (editErrorEl) {
+      editErrorEl.classList.add("hidden");
+      editErrorEl.textContent = "";
+    }
+  };
+
+  //   const handleDetailsEditClick = () => {
+  //   console.log("[edit] Edit button clicked");
+  //   if (!currentTaskData || !currentTaskId) {
+  //     console.warn("[edit] No current task selected");
+  //     return;
+  //   }
+
+  //   // Close details so edit panel isn't hidden behind it
+  //   closeDetailsPanel();
+
+  //   // Open separate edit panel prefilled with current data
+  //   openEditPanelForTask(currentTaskData);
+  // };
+    const handleDetailsEditClick = async () => {
+    console.log("[edit] Edit button clicked");
+
+    // 1) Prefer the hidden input inside the details modal
+    const hiddenId = taskDetailsTaskIdInput ? taskDetailsTaskIdInput.value : "";
+    const taskId = hiddenId || currentTaskId;
+
+    console.log("[edit] taskId from hidden/current:", { hiddenId, currentTaskId, taskId });
+
+    if (!taskId) {
+      console.warn("[edit] No task id available for edit");
+      return;
+    }
+
+    // 2) If we have a cached task for this id, use it
+    if (currentTaskData && currentTaskData.id === taskId) {
+      console.log("[edit] Using cached currentTaskData");
+      closeDetailsPanel();
+      openEditPanelForTask(currentTaskData);
+      return;
+    }
+
+    // 3) Otherwise, fetch fresh details from the API
+    const url = `${detailBaseUrl}${taskId}/`;
+    console.log("[edit] Fetching task for edit from:", url);
+
+    try {
+      const response = await fetch(url, {
+        headers: {
+          "X-Requested-With": "XMLHttpRequest",
+        },
+      });
+
+      if (!response.ok) {
+        console.error("[edit] Failed to fetch task details for edit", response.status);
+        return;
+      }
+
+      const data = await response.json();
+      if (!data.ok || !data.task) {
+        console.error("[edit] Invalid task detail payload for edit", data);
+        return;
+      }
+
+      // Keep globals in sync
+      currentTaskData = data.task;
+      currentTaskId = data.task.id;
+
+      // Close details so edit panel isn't hidden
+      closeDetailsPanel();
+
+      // Open edit panel with fresh task data
+      openEditPanelForTask(data.task);
+    } catch (err) {
+      console.error("[edit] Error fetching task for edit", err);
+    }
+  };
+
+
+  window.handleTaskDetailsEdit = handleDetailsEditClick;
+
+// if (detailsPanel) {
+//   detailsPanel.addEventListener("click", (event) => {
+//     // 🔹 Edit button (or its icon children)
+//     const editBtn = event.target.closest("#task-details-edit-btn");
+//     if (editBtn) {
+//       console.log("[edit] Delegated handler fired");
+//       handleDetailsEditClick();
+//       return;
+//     }
+
+//     // 🔹 Delete button (still handled normally, but we can keep it here too if you want)
+//     const deleteBtn = event.target.closest("#task-details-delete-btn");
+//     if (deleteBtn && taskDetailsDeleteBtn) {
+//       handleDeleteTaskClick();
+//       return;
+//     }
+
+//     // (You can also later hook mark-complete here if you prefer.)
+//   });
+// }
+
+    if (editForm) {
+    editForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+
+      if (!editTaskIdInput) return;
+      const taskId = editTaskIdInput.value;
+      if (!taskId) {
+        console.warn("[edit] No task id in edit form");
+        return;
+      }
+
+      const formData = new FormData(editForm);
+      const payload = Object.fromEntries(formData.entries());
+
+      const url = `/tasks/api/tasks/${taskId}/update/`;
+
+      try {
+        const response = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCsrfToken(),
+          },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+          const msg =
+            data.errors && data.errors.title
+              ? data.errors.title
+              : "Something went wrong.";
+          if (editErrorEl) {
+            editErrorEl.textContent = msg;
+            editErrorEl.classList.remove("hidden");
+          }
+          return;
+        }
+
+        // 1) Refresh tasks table
+        await loadTasks(currentStatusFilter);
+
+        // 2) Optionally reopen details modal with fresh data
+        if (data.task) {
+          renderTaskDetails(data.task);
+        } else {
+          openTaskDetailsById(taskId);
+        }
+
+        // 3) Close the edit panel
+        closeEditPanel();
+      } catch (err) {
+        console.error("Error updating task", err);
+        if (editErrorEl) {
+          editErrorEl.textContent = "Network error. Please try again.";
+          editErrorEl.classList.remove("hidden");
+        }
+      }
+    });
+  }
+
+
+
   if (tableBody) {
     tableBody.addEventListener("click", handleTableBodyClick);
   }
@@ -495,6 +795,19 @@ const renderTaskDetails = (task) => {
   if (taskDetailsDeleteBtn) {
     taskDetailsDeleteBtn.addEventListener("click", handleDeleteTaskClick);
   }
+
+    if (editCloseBtn) {
+    editCloseBtn.addEventListener("click", closeEditPanel);
+  }
+  if (editCancelBtn) {
+    editCancelBtn.addEventListener("click", closeEditPanel);
+  }
+
+    if (detailsEditBtn) {
+    detailsEditBtn.addEventListener("click", handleDetailsEditClick);
+  }
+
+  
 
 })()
 
