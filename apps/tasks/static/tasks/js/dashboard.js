@@ -385,6 +385,22 @@ const renderTaskDetails = (task) => {
 
       const data = await response.json();
       renderTasks(data.tasks || []);
+
+      if (data.stats) {
+        const inProgressEl = document.getElementById("stat-in-progress");
+        const completedEl = document.getElementById("stat-completed");
+        const urgentEl = document.getElementById("stat-urgent-today");
+
+        if (inProgressEl) {
+          inProgressEl.textContent = data.stats.tasks_in_progress_this_week;
+        }
+        if (completedEl) {
+          completedEl.textContent = data.stats.tasks_completed_this_week;
+        }
+        if (urgentEl) {
+          urgentEl.textContent = data.stats.tasks_urgent_today;
+        }
+      }
     } catch (err) {
       console.error("Error loading tasks", err);
     }

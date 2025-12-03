@@ -27,8 +27,8 @@
                flex items-center justify-between shadow-md"
       >
         <div>
-          <p class="text-sm text-slate-300 mb-1">Tasks To Do</p>
-          <p class="text-3xl font-bold">{{ tasks_in_progress_this_week }}</p>
+          <p class="text-sm text-slate-300 mb-1">Tasks In progress (Currently Working On)</p>
+          <p class="text-3xl font-bold" id="stat-in-progress">{{ tasks_in_progress_this_week }}</p>
         </div>
         <div class="flex items-center justify-center w-10 h-10 rounded-full bg-slate-800/70">
           <iconify-icon icon="mdi:timer-sand" class="text-xl"></iconify-icon>
@@ -42,7 +42,7 @@
       >
         <div>
           <p class="text-sm text-slate-300 mb-1">Completed Tasks</p>
-          <p class="text-3xl font-bold">{{ tasks_completed_this_week }}</p>
+          <p class="text-3xl font-bold" id="stat-completed">{{ tasks_completed_this_week }}</p>
         </div>
         <div class="flex items-center justify-center w-10 h-10 rounded-full bg-emerald-500/15">
           <iconify-icon icon="mdi:check-circle" class="text-emerald-400 text-2xl"></iconify-icon>
@@ -56,7 +56,7 @@
       >
         <div>
           <p class="text-sm text-slate-300 mb-1">Upcoming Deadlines (Today)</p>
-          <p class="text-3xl font-bold">{{ tasks_urgent_today }}</p>
+          <p class="text-3xl font-bold" id="stat-urgent-today">{{ tasks_urgent_today }}</p>
         </div>
         <div class="flex items-center justify-center w-10 h-10 rounded-full bg-rose-500/15">
           <iconify-icon icon="mdi:alert" class="text-rose-400 text-2xl"></iconify-icon>

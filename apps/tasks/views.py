@@ -86,8 +86,6 @@ def get_task_identifier(task: Task) -> str:
 
     return str(raw_id) if raw_id is not None else ""
 
-
-
 def serialize_user(user):
     """
     Simplified representation of a user for JSON responses.
@@ -128,6 +126,41 @@ def serialize_task(task: Task):
         "assignee": serialize_user(task.assignee),
     }
 
+# Helper to calculate the statics 
+def compute_task_stats(tasks):
+    """
+    Given a list of Task objects, compute the dashboard stats.
+    """
+    today = timezone.localdate()
+    start_of_week = today - datetime.timedelta(days=today.weekday())
+
+    tasks_in_progress_this_week = 0
+    tasks_completed_this_week = 0
+    tasks_urgent_today = 0
+
+    for task in tasks:
+        created_date = task.created_at.date() if task.created_at else None
+        due_date = task.due_date
+
+        if created_date and start_of_week <= created_date <= today:
+            if task.status == Task.STATUS_IN_PROGRESS:
+                tasks_in_progress_this_week += 1
+            elif task.status == Task.STATUS_DONE:
+                tasks_completed_this_week += 1
+
+        if (
+            due_date == today
+            and task.status in [Task.STATUS_TODO, Task.STATUS_IN_PROGRESS]
+        ):
+            tasks_urgent_today += 1
+
+    return {
+        "tasks_in_progress_this_week": tasks_in_progress_this_week,
+        "tasks_completed_this_week": tasks_completed_this_week,
+        "tasks_urgent_today": tasks_urgent_today,
+    }
+
+
 
 # --------------------- Views (controller) ----------------------------
 
@@ -135,41 +168,15 @@ class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = "tasks/dashboard.html"
 
     def get_context_data(self, **kwargs):
-        """
-        Simple version:
-        - Only tasks created by the current user.
-        - Stats computed in Python.
-        """
         context = super().get_context_data(**kwargs)
 
         user = self.request.user
 
-        # 🔹 Only tasks created by this user (Djongo-safe)
         tasks_qs = Task.objects.filter(created_by=user)
         tasks = list(tasks_qs)
 
-        today = timezone.localdate()
-        start_of_week = today - datetime.timedelta(days=today.weekday())
-
-        tasks_in_progress_this_week = 0
-        tasks_completed_this_week = 0
-        tasks_urgent_today = 0
-
-        for task in tasks:
-            created_date = task.created_at.date() if task.created_at else None
-            due_date = task.due_date
-
-            if created_date and start_of_week <= created_date <= today:
-                if task.status == Task.STATUS_TODO:
-                    tasks_in_progress_this_week += 1
-                elif task.status == Task.STATUS_DONE:
-                    tasks_completed_this_week += 1
-
-            if (
-                due_date == today
-                and task.status in [Task.STATUS_TODO, Task.STATUS_IN_PROGRESS]
-            ):
-                tasks_urgent_today += 1
+        # 🔹 Use shared helper
+        stats = compute_task_stats(tasks)
 
         # Python-side sorting: by due_date then created_at desc
         sorted_tasks = sorted(
@@ -184,9 +191,9 @@ class DashboardView(LoginRequiredMixin, TemplateView):
         context["active_page"] = "tasks"
         context["tasks"] = sorted_tasks[:50]
 
-        context["tasks_in_progress_this_week"] = tasks_in_progress_this_week
-        context["tasks_completed_this_week"] = tasks_completed_this_week
-        context["tasks_urgent_today"] = tasks_urgent_today
+        context["tasks_in_progress_this_week"] = stats["tasks_in_progress_this_week"]
+        context["tasks_completed_this_week"] = stats["tasks_completed_this_week"]
+        context["tasks_urgent_today"] = stats["tasks_urgent_today"]
 
         return context
 
@@ -270,6 +277,13 @@ class TaskListApiView(LoginRequiredMixin, View):
     def get(self, request):
         user = request.user
 
+        # Base queryset for this user
+        base_qs = Task.objects.filter(created_by=user)
+
+        # 🔹 Compute stats on ALL tasks (regardless of table filters)
+        all_tasks = list(base_qs)
+        stats = compute_task_stats(all_tasks)
+        
         # Start from tasks created by this user only
         qs = Task.objects.filter(created_by=user)
 
@@ -295,6 +309,7 @@ class TaskListApiView(LoginRequiredMixin, View):
             {
                 "tasks": tasks_data,
                 "count": len(tasks_data),
+                "stats": stats,
             }
         )
     
