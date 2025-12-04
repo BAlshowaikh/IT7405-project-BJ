@@ -456,4 +456,27 @@ class TaskUpdateApiView(LoginRequiredMixin, View):
             }
         )
 
+# --------------------- Mark task as complete ------------------------
+class TaskCompleteApiView(LoginRequiredMixin, View):
+  def post(self, request, public_id):
+      task = get_object_or_404(Task, public_id=public_id, created_by=request.user)
 
+      if task.status == Task.STATUS_DONE:
+          # Already done – just return current state
+          stats = compute_task_stats(request.user)
+          return JsonResponse(
+              {"ok": True, "task": serialize_task(task), "stats": stats}
+          )
+
+      task.status = Task.STATUS_DONE
+      task.save()
+
+      stats = compute_task_stats(request.user)
+
+      return JsonResponse(
+          {
+              "ok": True,
+              "task": serialize_task(task),
+              "stats": stats,
+          }
+      )

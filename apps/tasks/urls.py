@@ -24,8 +24,9 @@ urlpatterns = [
     # Update a task
     path("api/tasks/<str:public_id>/update/", views.TaskUpdateApiView.as_view(), name="api_update"),
 
-    # # Change status from the list directly
-    # path("api/tasks/<str:pk>/status/", views.TaskStatusApiView.as_view(), name="api_status"),
+    # Update status to done via checkbox
+    path("api/tasks/<str:public_id>/complete/", views.TaskCompleteApiView.as_view(), name="api_complete"),
+
 
     # Delete a task
     # path("api/tasks/<str:public_id>/delete/", views.TaskDeleteApiView.as_view(), name="api_delete"),

@@ -7,13 +7,13 @@
 //   const errorEl = document.getElementById("add-task-error");
 //   const tableBody = document.getElementById("tasks-table-body");
 
-//     // ------- Task details elements -------
+//   // ------- Task details elements -------
 //   const taskDetailsPanel = document.getElementById("task-details-panel");
 //   const taskDetailsTaskIdInput = document.getElementById("task-details-task-id");
 //   const taskDetailsDeleteBtn = document.getElementById("task-details-delete-btn");
 //   const markCompleteBtn = document.getElementById("task-details-mark-complete");
 
-//     // ------- Edit Task panel elements -------
+//   // ------- Edit Task panel elements -------
 //   const editPanel = document.getElementById("edit-task-panel");
 //   const editForm = document.getElementById("edit-task-form");
 //   const editErrorEl = document.getElementById("edit-task-error");
@@ -26,6 +26,9 @@
 //   const editCancelBtn = document.getElementById("cancel-edit-task");
 //   const editStatusSelect = document.getElementById("edit-task-status");
 
+//   // ------- Search elements -------
+//   const searchInput = document.getElementById("task-search");
+//   const searchSuggestionsEl = document.getElementById("task-search-suggestions");
 
 //   // read URLs from data attributes (fallback to hard-coded)
 //   const root = document.getElementById("tasks-dashboard-root");
@@ -38,6 +41,7 @@
 
 //   // Current tab filter: "all", "in_progress", "done"
 //   let currentStatusFilter = "all";
+//   let currentSearchQuery = "";
 
 //   // ---------------- Add Task panel open/close helpers ----------------
 //   const openPanel = () => {
@@ -64,9 +68,7 @@
 //   if (closeBtn) closeBtn.addEventListener("click", closePanel);
 //   if (cancelBtn) cancelBtn.addEventListener("click", closePanel);
 
-//   // ---------------- Small helpers for pills (table) ----------------
-
-//   // Function for tabs in the table 
+//   // ---------------- Status tabs (All / In progress / Completed) ----------------
 //   const statusTabsContainer = document.getElementById("task-status-tabs");
 
 //   const setActiveStatusTab = (status) => {
@@ -78,15 +80,26 @@
 //       const btnStatus = btn.getAttribute("data-status");
 
 //       if (btnStatus === status) {
-//         btn.classList.add("border-b-2", "border-sky-500", "text-slate-900", "font-medium");
+//         btn.classList.add(
+//           "border-b-2",
+//           "border-sky-500",
+//           "text-slate-900",
+//           "font-medium"
+//         );
 //         btn.classList.remove("text-slate-500");
 //       } else {
-//         btn.classList.remove("border-b-2", "border-sky-500", "text-slate-900", "font-medium");
+//         btn.classList.remove(
+//           "border-b-2",
+//           "border-sky-500",
+//           "text-slate-900",
+//           "font-medium"
+//         );
 //         btn.classList.add("text-slate-500");
 //       }
 //     });
 //   };
 
+//   // Tabs click -> change filter + reload
 //   if (statusTabsContainer) {
 //     statusTabsContainer.addEventListener("click", (event) => {
 //       const clicked = event.target.closest("[data-status]");
@@ -94,17 +107,15 @@
 
 //       const newStatus = clicked.getAttribute("data-status") || "all";
 
-//       // update global
 //       currentStatusFilter = newStatus;
-
-//       // update tabs appearance
 //       setActiveStatusTab(newStatus);
 
-//       // reload tasks with filter
-//       loadTasks(newStatus);
+//       // reload tasks with current search + status
+//       loadTasks(currentStatusFilter, currentSearchQuery);
 //     });
 //   }
 
+//   // ---------------- Small helpers for pills (table) ----------------
 //   function priorityPillHtml(priority) {
 //     if (priority === "high") {
 //       return `
@@ -170,14 +181,13 @@
 //     "task-details-priority-pill"
 //   );
 //   const detailsDueDateEl = document.getElementById("task-details-due-date");
-//   const detailsEditBtn = document.getElementById("task-details-edit-btn"); // for later
+//   const detailsEditBtn = document.getElementById("task-details-edit-btn");
 
 //   let currentTaskId = null;
 //   let currentTaskData = null;
 
 //   const openDetailsPanel = () => {
 //     if (!detailsPanel) return;
-//     // Panel starts with translate-x-full (hidden offscreen)
 //     detailsPanel.classList.remove("translate-x-full");
 //   };
 
@@ -194,7 +204,6 @@
 //     });
 //   }
 
-//   // Small helpers to style the pills inside the modal
 //   const setStatusPillElement = (el, status) => {
 //     if (!el) return;
 
@@ -209,11 +218,23 @@
 //       "inline-flex items-center px-2 py-1 rounded-full border font-medium text-xs";
 
 //     if (status === "done") {
-//       el.classList.add("bg-emerald-100", "text-emerald-700", "border-emerald-200");
+//       el.classList.add(
+//         "bg-emerald-100",
+//         "text-emerald-700",
+//         "border-emerald-200"
+//       );
 //     } else if (status === "in_progress") {
-//       el.classList.add("bg-indigo-100", "text-indigo-700", "border-indigo-200");
+//       el.classList.add(
+//         "bg-indigo-100",
+//         "text-indigo-700",
+//         "border-indigo-200"
+//       );
 //     } else {
-//       el.classList.add("bg-slate-100", "text-slate-700", "border-slate-200");
+//       el.classList.add(
+//         "bg-slate-100",
+//         "text-slate-700",
+//         "border-slate-200"
+//       );
 //     }
 //   };
 
@@ -239,63 +260,60 @@
 //     }
 //   };
 
-// const renderTaskDetails = (task) => {
-//   if (!task) return;
+//   const renderTaskDetails = (task) => {
+//     if (!task) return;
 
-//   // 🔹 Keep track of the currently opened task
-//   currentTaskId = task.id;          // this is your public_id from backend
-//   currentTaskData = task;
+//     currentTaskId = task.id;
+//     currentTaskData = task;
 
-//   // Optional: also sync hidden input (useful for debugging or other handlers)
-//   if (taskDetailsTaskIdInput) {
-//     taskDetailsTaskIdInput.value = task.id || "";
-//   }
-
-//   // ----- Title -----
-//   if (detailsTitleEl) {
-//     detailsTitleEl.textContent = task.title || "";
-//   }
-
-//   // ----- Description -----
-//   if (detailsDescriptionEl) {
-//     const desc = task.description || "";
-//     detailsDescriptionEl.textContent =
-//       desc.trim().length > 0 ? desc : "No description.";
-//   }
-
-//   // ----- Status + Priority pills -----
-//   setStatusPillElement(detailsStatusPillEl, task.status);
-//   setPriorityPillElement(detailsPriorityPillEl, task.priority);
-
-//   // ----- Due date -----
-//   if (detailsDueDateEl) {
-//     if (task.due_date) {
-//       detailsDueDateEl.textContent = `Due: ${task.due_date}`;
-//     } else {
-//       detailsDueDateEl.textContent = "No due date";
+//     if (taskDetailsTaskIdInput) {
+//       taskDetailsTaskIdInput.value = task.id || "";
 //     }
-//   }
 
-//   // ----- Mark as complete button label -----
-//   if (markCompleteBtn) {
-//     if (task.status === "done") {
-//       markCompleteBtn.textContent = "Completed";
-//       markCompleteBtn.disabled = true;
-//       markCompleteBtn.classList.remove("bg-emerald-500", "hover:bg-emerald-400");
-//       markCompleteBtn.classList.add("bg-emerald-700", "cursor-default");
-//     } else {
-//       markCompleteBtn.textContent = "Mark as Complete";
-//       markCompleteBtn.disabled = false;
-//       markCompleteBtn.classList.add("bg-emerald-500");
-//       markCompleteBtn.classList.remove("bg-emerald-700", "cursor-default");
+//     if (detailsTitleEl) {
+//       detailsTitleEl.textContent = task.title || "";
 //     }
-//   }
 
-//   // Finally, open the slide-over panel
-//   openDetailsPanel();
-// }
+//     if (detailsDescriptionEl) {
+//       const desc = task.description || "";
+//       detailsDescriptionEl.textContent =
+//         desc.trim().length > 0 ? desc : "No description.";
+//     }
 
-  
+//     setStatusPillElement(detailsStatusPillEl, task.status);
+//     setPriorityPillElement(detailsPriorityPillEl, task.priority);
+
+//     if (detailsDueDateEl) {
+//       if (task.due_date) {
+//         detailsDueDateEl.textContent = `Due: ${task.due_date}`;
+//       } else {
+//         detailsDueDateEl.textContent = "No due date";
+//       }
+//     }
+
+//     if (markCompleteBtn) {
+//       if (task.status === "done") {
+//         markCompleteBtn.textContent = "Completed";
+//         markCompleteBtn.disabled = true;
+//         markCompleteBtn.classList.remove(
+//           "bg-emerald-500",
+//           "hover:bg-emerald-400"
+//         );
+//         markCompleteBtn.classList.add("bg-emerald-700", "cursor-default");
+//       } else {
+//         markCompleteBtn.textContent = "Mark as Complete";
+//         markCompleteBtn.disabled = false;
+//         markCompleteBtn.classList.add("bg-emerald-500");
+//         markCompleteBtn.classList.remove(
+//           "bg-emerald-700",
+//           "cursor-default"
+//         );
+//       }
+//     }
+
+//     openDetailsPanel();
+//   };
+
 //   const openTaskDetailsById = async (taskId) => {
 //     if (!taskId || !detailBaseUrl) return;
 
@@ -328,20 +346,16 @@
 //   const attachTaskRowClickHandlers = () => {
 //     if (!tableBody) return;
 
-//     // Works for both server-rendered and JS-rendered rows
 //     const rows = tableBody.querySelectorAll("tr[data-task-id]");
 
 //     rows.forEach((row) => {
-//       // Ensure common class if you want styling
 //       row.classList.add("task-row");
 
-//       // Avoid stacking duplicate listeners
 //       if (row._taskClickHandler) {
 //         row.removeEventListener("click", row._taskClickHandler);
 //       }
 
 //       const handler = (event) => {
-//         // Ignore clicks on checkboxes (for future complete-toggle)
 //         if (event.target.closest("input[type='checkbox']")) {
 //           return;
 //         }
@@ -400,12 +414,18 @@
 //     tableBody.innerHTML = rowsHtml;
 //   };
 
-//   async function loadTasks(statusFilter = "all") {
+//   // Main loader: supports status filter + search query + stats
+//   async function loadTasks(statusFilter = "all", searchQuery = "") {
 //     if (!listUrl) return;
 
 //     const params = new URLSearchParams();
+
 //     if (statusFilter && statusFilter !== "all") {
 //       params.append("status", statusFilter);
+//     }
+
+//     if (searchQuery && searchQuery.trim().length > 0) {
+//       params.append("q", searchQuery.trim());
 //     }
 
 //     const url =
@@ -426,6 +446,7 @@
 //       const data = await response.json();
 //       renderTasks(data.tasks || []);
 
+//       // Update stats if provided
 //       if (data.stats) {
 //         const inProgressEl = document.getElementById("stat-in-progress");
 //         const completedEl = document.getElementById("stat-completed");
@@ -447,14 +468,10 @@
 //   }
 
 //   // Initial load
-//   loadTasks(currentStatusFilter);
+//   loadTasks(currentStatusFilter, currentSearchQuery);
 
-//   // Attach handlers to any server-rendered rows (before/if API load fails)
 //   attachTaskRowClickHandlers();
-
-//   // Attach a function to check for the status (tabs in the table)
 //   setActiveStatusTab(currentStatusFilter);
-
 
 //   // ---------------- Form submit (create task) ----------------
 //   if (form) {
@@ -486,21 +503,19 @@
 //           return;
 //         }
 
-//         // Reload the list so the new task uses the same markup
-//         await loadTasks(currentStatusFilter);
-
+//         await loadTasks(currentStatusFilter, currentSearchQuery);
 //         closePanel();
 //       } catch (err) {
 //         errorEl.textContent = "Network error. Please try again.";
-//         errorEl.classList.remove("hidden")
+//         errorEl.classList.remove("hidden");
 //       }
-//     })
+//     });
 //   }
 
+//   // ---------------- Row clicks -> open details ----------------
 //   const handleTableBodyClick = (event) => {
 //     if (!tableBody) return;
 
-//     // Ignore clicks on checkboxes (for later complete-toggle)
 //     if (event.target.closest("input[type='checkbox']")) {
 //       return;
 //     }
@@ -509,8 +524,6 @@
 //     if (!row) return;
 
 //     const taskId = row.getAttribute("data-task-id");
-//     // console.log("[handleTableBodyClick] clicked taskId:", taskId);
-
 //     if (!taskId) {
 //       console.warn("Row has no valid task id");
 //       return;
@@ -518,7 +531,52 @@
 //     openTaskDetailsById(taskId);
 //   };
 
-//   // --------------- Handle the Delete icon clicks
+//   if (tableBody) {
+//     tableBody.addEventListener("click", handleTableBodyClick);
+//   }
+//   // ----------------------- Mark task complete via checkbox---------------------
+//   const markTaskComplete = async (taskId, checkboxEl) => {
+//     try {
+//       const response = await fetch(`/tasks/api/tasks/${taskId}/complete/`, {
+//         method: "POST",
+//         headers: {
+//           "Content-Type": "application/json",
+//           "X-CSRFToken": getCsrfToken(),
+//           "X-Requested-With": "XMLHttpRequest",
+//         },
+//         body: JSON.stringify({}), // no payload needed for now
+//       });
+
+//       const data = await response.json().catch(() => ({}));
+
+//       if (!response.ok || data.ok === false) {
+//         console.error("[checkbox] Failed to mark complete", response.status, data);
+//         // revert the checkbox if backend failed
+//         if (checkboxEl) {
+//           checkboxEl.checked = false;
+//         }
+//         alert("Could not mark the task as completed. Please try again.");
+//         return;
+//       }
+
+//       // Lock the checkbox
+//       if (checkboxEl) {
+//         checkboxEl.checked = true;
+//         checkboxEl.disabled = true;
+//       }
+
+//       // 🔁 Refresh table + stats with current filters/search
+//       await loadTasks(currentStatusFilter, currentSearchQuery);
+//     } catch (err) {
+//       console.error("[checkbox] Error marking complete", err);
+//       if (checkboxEl) {
+//         checkboxEl.checked = false;
+//       }
+//       alert("Network error while updating the task. Please try again.");
+//     }
+//   };
+
+//   // --------------- Delete task from details modal ---------------
 //   const handleDeleteTaskClick = async () => {
 //     if (!taskDetailsTaskIdInput) return;
 
@@ -552,64 +610,25 @@
 //         return;
 //       }
 
-//       // Success: close details panel & reload tasks
 //       closeDetailsPanel();
-//       await loadTasks(currentStatusFilter);
+//       await loadTasks(currentStatusFilter, currentSearchQuery);
 //     } catch (err) {
 //       console.error("Error deleting task", err);
 //       alert("Network error while deleting the task. Please try again.");
 //     }
 //   };
 
-//   // --------------- Handle the edit panel
-//   //   const toDateInputValue = (isoString) => {
-//   //   if (!isoString) return "";
-//   //   // "2025-11-30" or "2025-11-30T00:00:00Z"
-//   //   return isoString.slice(0, 10);
-//   // };
+//   if (taskDetailsDeleteBtn) {
+//     taskDetailsDeleteBtn.addEventListener("click", handleDeleteTaskClick);
+//   }
 
-//   // const openEditPanelForTask = (task) => {
-//   //   if (!task || !editPanel) return;
-
-//   //   // Fill hidden id with public_id
-//   //   if (editTaskIdInput) {
-//   //     editTaskIdInput.value = task.id || "";
-//   //   }
-
-//   //   if (editTitleInput) {
-//   //     editTitleInput.value = task.title || "";
-//   //   }
-
-//   //   if (editDescriptionInput) {
-//   //     editDescriptionInput.value = task.description || "";
-//   //   }
-
-//   //   if (editDueDateInput) {
-//   //     editDueDateInput.value = toDateInputValue(task.due_date);
-//   //   }
-
-//   //   if (editPrioritySelect) {
-//   //     editPrioritySelect.value = task.priority || "mid";
-//   //   }
-
-//   //   if (editErrorEl) {
-//   //     editErrorEl.classList.add("hidden");
-//   //     editErrorEl.textContent = "";
-//   //   }
-
-//   //   // Slide in
-//   //   editPanel.classList.remove("translate-x-full");
-//   // };
-//     const toDateInputValue = (isoString) => {
+//   // --------------- Edit panel helpers ---------------
+//   const toDateInputValue = (isoString) => {
 //     if (!isoString) return "";
-//     // "2025-11-30" or "2025-11-30T00:00:00Z"
 //     return isoString.slice(0, 10);
 //   };
 
 //   const openEditPanelForTask = (task) => {
-//     // console.log("[edit] openEditPanelForTask called with:", task);
-
-//     // 🔹 Always query fresh from DOM (in case earlier const was null)
 //     const panelEl = document.getElementById("edit-task-panel");
 //     const idInputEl = document.getElementById("edit-task-id");
 //     const titleInputEl = document.getElementById("edit-task-title");
@@ -618,16 +637,6 @@
 //     const prioritySelectEl = document.getElementById("edit-task-priority");
 //     const statusSelectEl = document.getElementById("edit-task-status");
 //     const errorEl = document.getElementById("edit-task-error");
-
-//     // console.log("[edit] DOM refs", {
-//     //   panelEl,
-//     //   idInputEl,
-//     //   titleInputEl,
-//     //   descInputEl,
-//     //   dueDateInputEl,
-//     //   prioritySelectEl,
-//     //   errorEl,
-//     // });
 
 //     if (!task) {
 //       console.warn("[edit] No task passed into openEditPanelForTask");
@@ -639,7 +648,6 @@
 //       return;
 //     }
 
-//     // Fill hidden id with public_id
 //     if (idInputEl) {
 //       idInputEl.value = task.id || "";
 //     }
@@ -661,7 +669,7 @@
 //     }
 
 //     if (statusSelectEl) {
-//     statusSelectEl.value = task.status || "todo";
+//       statusSelectEl.value = task.status || "todo";
 //     }
 
 //     if (errorEl) {
@@ -669,11 +677,8 @@
 //       errorEl.textContent = "";
 //     }
 
-//     // 🔹 Slide in (remove translate-x-full so it appears)
 //     panelEl.classList.remove("translate-x-full");
-//     // console.log("[edit] Removed translate-x-full from edit-task-panel");
 //   };
-
 
 //   const closeEditPanel = () => {
 //     if (!editPanel) return;
@@ -689,44 +694,21 @@
 //     }
 //   };
 
-//   //   const handleDetailsEditClick = () => {
-//   //   console.log("[edit] Edit button clicked");
-//   //   if (!currentTaskData || !currentTaskId) {
-//   //     console.warn("[edit] No current task selected");
-//   //     return;
-//   //   }
-
-//   //   // Close details so edit panel isn't hidden behind it
-//   //   closeDetailsPanel();
-
-//   //   // Open separate edit panel prefilled with current data
-//   //   openEditPanelForTask(currentTaskData);
-//   // };
-//     const handleDetailsEditClick = async () => {
-//     // console.log("[edit] Edit button clicked");
-
-//     // 1) Prefer the hidden input inside the details modal
+//   const handleDetailsEditClick = async () => {
 //     const hiddenId = taskDetailsTaskIdInput ? taskDetailsTaskIdInput.value : "";
 //     const taskId = hiddenId || currentTaskId;
 
-//     // console.log("[edit] taskId from hidden/current:", { hiddenId, currentTaskId, taskId });
-
 //     if (!taskId) {
-//       // console.warn("[edit] No task id available for edit");
 //       return;
 //     }
 
-//     // 2) If we have a cached task for this id, use it
 //     if (currentTaskData && currentTaskData.id === taskId) {
-//       // console.log("[edit] Using cached currentTaskData");
 //       closeDetailsPanel();
 //       openEditPanelForTask(currentTaskData);
 //       return;
 //     }
 
-//     // 3) Otherwise, fetch fresh details from the API
 //     const url = `${detailBaseUrl}${taskId}/`;
-//     // console.log("[edit] Fetching task for edit from:", url);
 
 //     try {
 //       const response = await fetch(url, {
@@ -736,7 +718,10 @@
 //       });
 
 //       if (!response.ok) {
-//         console.error("[edit] Failed to fetch task details for edit", response.status);
+//         console.error(
+//           "[edit] Failed to fetch task details for edit",
+//           response.status
+//         );
 //         return;
 //       }
 
@@ -746,45 +731,23 @@
 //         return;
 //       }
 
-//       // Keep globals in sync
 //       currentTaskData = data.task;
 //       currentTaskId = data.task.id;
 
-//       // Close details so edit panel isn't hidden
 //       closeDetailsPanel();
-
-//       // Open edit panel with fresh task data
 //       openEditPanelForTask(data.task);
 //     } catch (err) {
 //       console.error("[edit] Error fetching task for edit", err);
 //     }
 //   };
 
-
 //   window.handleTaskDetailsEdit = handleDetailsEditClick;
 
-// // if (detailsPanel) {
-// //   detailsPanel.addEventListener("click", (event) => {
-// //     // 🔹 Edit button (or its icon children)
-// //     const editBtn = event.target.closest("#task-details-edit-btn");
-// //     if (editBtn) {
-// //       console.log("[edit] Delegated handler fired");
-// //       handleDetailsEditClick();
-// //       return;
-// //     }
+//   if (detailsEditBtn) {
+//     detailsEditBtn.addEventListener("click", handleDetailsEditClick);
+//   }
 
-// //     // 🔹 Delete button (still handled normally, but we can keep it here too if you want)
-// //     const deleteBtn = event.target.closest("#task-details-delete-btn");
-// //     if (deleteBtn && taskDetailsDeleteBtn) {
-// //       handleDeleteTaskClick();
-// //       return;
-// //     }
-
-// //     // (You can also later hook mark-complete here if you prefer.)
-// //   });
-// // }
-
-//     if (editForm) {
+//   if (editForm) {
 //     editForm.addEventListener("submit", async (event) => {
 //       event.preventDefault();
 
@@ -824,17 +787,14 @@
 //           return;
 //         }
 
-//         // 1) Refresh tasks table
-//         await loadTasks(currentStatusFilter);
+//         await loadTasks(currentStatusFilter, currentSearchQuery);
 
-//         // 2) Optionally reopen details modal with fresh data
 //         if (data.task) {
 //           renderTaskDetails(data.task);
 //         } else {
 //           openTaskDetailsById(taskId);
 //         }
 
-//         // 3) Close the edit panel
 //         closeEditPanel();
 //       } catch (err) {
 //         console.error("Error updating task", err);
@@ -846,27 +806,174 @@
 //     });
 //   }
 
-
-
-//   if (tableBody) {
-//     tableBody.addEventListener("click", handleTableBodyClick);
-//   }
-
-//   if (taskDetailsDeleteBtn) {
-//     taskDetailsDeleteBtn.addEventListener("click", handleDeleteTaskClick);
-//   }
-
-//     if (editCloseBtn) {
+//   if (editCloseBtn) {
 //     editCloseBtn.addEventListener("click", closeEditPanel);
 //   }
 //   if (editCancelBtn) {
 //     editCancelBtn.addEventListener("click", closeEditPanel);
 //   }
 
-//     if (detailsEditBtn) {
-//     detailsEditBtn.addEventListener("click", handleDetailsEditClick);
+//   // ============================================================
+//   // 🔎 SEARCH: live suggestions + apply filter
+//   // ============================================================
+
+//   const debounce = (fn, delay = 300) => {
+//     let timerId;
+//     return (...args) => {
+//       clearTimeout(timerId);
+//       timerId = setTimeout(() => fn(...args), delay);
+//     };
+//   };
+
+//   const hideSearchSuggestions = () => {
+//     if (!searchSuggestionsEl) return;
+//     searchSuggestionsEl.classList.add("hidden");
+//     searchSuggestionsEl.innerHTML = "";
+//   };
+
+//   const renderSearchSuggestions = (tasks, query) => {
+//     if (!searchSuggestionsEl) return;
+
+//     const q = (query || "").trim();
+//     if (!q) {
+//       hideSearchSuggestions();
+//       return;
+//     }
+
+//     const limited = (tasks || []).slice(0, 5);
+
+//     if (!limited.length) {
+//       searchSuggestionsEl.innerHTML = `
+//         <div class="px-3 py-2 text-slate-400 text-xs">
+//           No task titles match
+//         </div>
+//       `;
+//       searchSuggestionsEl.classList.remove("hidden");
+//       return;
+//     }
+
+//     searchSuggestionsEl.innerHTML = limited
+//       .map(
+//         (t) => `
+//           <button
+//             type="button"
+//             class="w-full text-left px-3 py-2 hover:bg-slate-50 text-slate-700 text-xs"
+//             data-task-id="${t.id}"
+//             data-task-title="${(t.title || "").replace(/"/g, "&quot;")}"
+//           >
+//             ${t.title}
+//           </button>
+//         `
+//       )
+//       .join("");
+
+//     searchSuggestionsEl.classList.remove("hidden");
+//   };
+
+//   const handleSearchInputChange = async (event) => {
+//     if (!listUrl) return;
+
+//     const query = event.target.value || "";
+//     currentSearchQuery = query;
+
+//     if (query.trim().length === 0) {
+//       hideSearchSuggestions();
+//       loadTasks(currentStatusFilter, "");
+//       return;
+//     }
+
+//     if (query.trim().length < 2) {
+//       hideSearchSuggestions();
+//       return;
+//     }
+
+//     const params = new URLSearchParams();
+
+//     if (currentStatusFilter && currentStatusFilter !== "all") {
+//       params.append("status", currentStatusFilter);
+//     }
+//     params.append("q", query.trim());
+
+//     const url = `${listUrl}?${params.toString()}`;
+
+//     try {
+//       const response = await fetch(url, {
+//         headers: { "X-Requested-With": "XMLHttpRequest" },
+//       });
+
+//       if (!response.ok) {
+//         console.error("Search suggestions load failed", response.status);
+//         return;
+//       }
+
+//       const data = await response.json();
+//       renderSearchSuggestions(data.tasks || [], query);
+//     } catch (err) {
+//       console.error("Error loading search suggestions", err);
+//     }
+//   };
+
+//   if (searchInput) {
+//     searchInput.addEventListener(
+//       "input",
+//       debounce(handleSearchInputChange, 350)
+//     );
+
+//     searchInput.addEventListener("keydown", (event) => {
+//       if (event.key === "Enter") {
+//         event.preventDefault();
+//         const query = searchInput.value || "";
+//         currentSearchQuery = query;
+//         hideSearchSuggestions();
+//         loadTasks(currentStatusFilter, query);
+//       }
+//     });
 //   }
-// })()
+
+//   if (searchSuggestionsEl) {
+//     searchSuggestionsEl.addEventListener("click", (event) => {
+//       const btn = event.target.closest("button[data-task-id]");
+//       if (!btn) return;
+
+//       const title = btn.getAttribute("data-task-title") || "";
+
+//       if (searchInput) {
+//         searchInput.value = title;
+//         currentSearchQuery = title;
+//       }
+
+//       hideSearchSuggestions();
+//       loadTasks(currentStatusFilter, title);
+//     });
+//   }
+
+//   // Handler for checkbox
+//     // When a checkbox is clicked, mark that task as complete
+//   if (tableBody) {
+//     tableBody.addEventListener("change", (event) => {
+//       const checkbox = event.target.closest(
+//         'input[type="checkbox"][data-task-id]'
+//       );
+//       if (!checkbox) return;
+
+//       // If it's already disabled (already done), ignore
+//       if (checkbox.disabled) return;
+
+//       const taskId = checkbox.getAttribute("data-task-id");
+//       if (!taskId) return;
+
+//       // We only support marking as DONE, not undoing.
+//       // If user unchecks, snap it back to checked state.
+//       if (!checkbox.checked) {
+//         checkbox.checked = true;
+//         return;
+//       }
+
+//       markTaskComplete(taskId, checkbox);
+//     });
+//   }
+
+// })();
 (function () {
   const openBtn = document.getElementById("open-add-task");
   const closeBtn = document.getElementById("close-add-task");
@@ -878,8 +985,12 @@
 
   // ------- Task details elements -------
   const taskDetailsPanel = document.getElementById("task-details-panel");
-  const taskDetailsTaskIdInput = document.getElementById("task-details-task-id");
-  const taskDetailsDeleteBtn = document.getElementById("task-details-delete-btn");
+  const taskDetailsTaskIdInput = document.getElementById(
+    "task-details-task-id"
+  );
+  const taskDetailsDeleteBtn = document.getElementById(
+    "task-details-delete-btn"
+  );
   const markCompleteBtn = document.getElementById("task-details-mark-complete");
 
   // ------- Edit Task panel elements -------
@@ -888,7 +999,9 @@
   const editErrorEl = document.getElementById("edit-task-error");
   const editTaskIdInput = document.getElementById("edit-task-id");
   const editTitleInput = document.getElementById("edit-task-title");
-  const editDescriptionInput = document.getElementById("edit-task-description");
+  const editDescriptionInput = document.getElementById(
+    "edit-task-description"
+  );
   const editDueDateInput = document.getElementById("edit-task-due-date");
   const editPrioritySelect = document.getElementById("edit-task-priority");
   const editCloseBtn = document.getElementById("close-edit-task");
@@ -897,7 +1010,9 @@
 
   // ------- Search elements -------
   const searchInput = document.getElementById("task-search");
-  const searchSuggestionsEl = document.getElementById("task-search-suggestions");
+  const searchSuggestionsEl = document.getElementById(
+    "task-search-suggestions"
+  );
 
   // read URLs from data attributes (fallback to hard-coded)
   const root = document.getElementById("tasks-dashboard-root");
@@ -968,7 +1083,6 @@
     });
   };
 
-  // Tabs click -> change filter + reload
   if (statusTabsContainer) {
     statusTabsContainer.addEventListener("click", (event) => {
       const clicked = event.target.closest("[data-status]");
@@ -979,7 +1093,6 @@
       currentStatusFilter = newStatus;
       setActiveStatusTab(newStatus);
 
-      // reload tasks with current search + status
       loadTasks(currentStatusFilter, currentSearchQuery);
     });
   }
@@ -1000,7 +1113,6 @@
           Low
         </span>`;
     }
-    // mid (default)
     return `
       <span class="inline-flex px-3 py-1 text-xs font-medium rounded-full
                    bg-amber-100 text-amber-700">
@@ -1023,7 +1135,6 @@
           In Progress
         </span>`;
     }
-    // todo (default)
     return `
       <span class="inline-flex px-3 py-1 text-xs font-medium rounded-full
                    bg-slate-100 text-slate-700">
@@ -1032,7 +1143,7 @@
   }
 
   // ============================================================
-  // 🔹 TASK DETAILS MODAL (view details when clicking a row)
+  // 🔹 TASK DETAILS MODAL
   // ============================================================
 
   const detailsPanel = document.getElementById("task-details-panel");
@@ -1258,6 +1369,9 @@
 
     const rowsHtml = tasks
       .map((task) => {
+        const checkboxState =
+          task.status === "done" ? "checked disabled" : "";
+
         return `
           <tr data-task-id="${task.id}"
               class="hover:bg-slate-50 cursor-pointer">
@@ -1266,6 +1380,8 @@
                 <input
                   type="checkbox"
                   class="h-4 w-4 rounded border-slate-300 text-sky-500"
+                  data-task-id="${task.id}"
+                  ${checkboxState}
                 />
                 <span class="text-sm font-medium">${task.title}</span>
               </div>
@@ -1283,7 +1399,6 @@
     tableBody.innerHTML = rowsHtml;
   };
 
-  // 🔹 Main loader: supports status filter + search query + stats
   async function loadTasks(statusFilter = "all", searchQuery = "") {
     if (!listUrl) return;
 
@@ -1315,7 +1430,6 @@
       const data = await response.json();
       renderTasks(data.tasks || []);
 
-      // Update stats if provided
       if (data.stats) {
         const inProgressEl = document.getElementById("stat-in-progress");
         const completedEl = document.getElementById("stat-completed");
@@ -1338,7 +1452,6 @@
 
   // Initial load
   loadTasks(currentStatusFilter, currentSearchQuery);
-
   attachTaskRowClickHandlers();
   setActiveStatusTab(currentStatusFilter);
 
@@ -1402,6 +1515,70 @@
 
   if (tableBody) {
     tableBody.addEventListener("click", handleTableBodyClick);
+  }
+
+  // ----------------------- Mark task complete via checkbox ---------------------
+  const markTaskComplete = async (taskId, checkboxEl) => {
+    try {
+      const response = await fetch(`/tasks/api/tasks/${taskId}/complete/`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-CSRFToken": getCsrfToken(),
+          "X-Requested-With": "XMLHttpRequest",
+        },
+        body: JSON.stringify({}),
+      });
+
+      const data = await response.json().catch(() => ({}));
+
+      if (!response.ok || data.ok === false) {
+        console.error(
+          "[checkbox] Failed to mark complete",
+          response.status,
+          data
+        );
+        if (checkboxEl) {
+          checkboxEl.checked = false;
+        }
+        alert("Could not mark the task as completed. Please try again.");
+        return;
+      }
+
+      if (checkboxEl) {
+        checkboxEl.checked = true;
+        checkboxEl.disabled = true;
+      }
+
+      await loadTasks(currentStatusFilter, currentSearchQuery);
+    } catch (err) {
+      console.error("[checkbox] Error marking complete", err);
+      if (checkboxEl) {
+        checkboxEl.checked = false;
+      }
+      alert("Network error while updating the task. Please try again.");
+    }
+  };
+
+  if (tableBody) {
+    tableBody.addEventListener("change", (event) => {
+      const checkbox = event.target.closest(
+        'input[type="checkbox"][data-task-id]'
+      );
+      if (!checkbox) return;
+
+      if (checkbox.disabled) return;
+
+      const taskId = checkbox.getAttribute("data-task-id");
+      if (!taskId) return;
+
+      if (!checkbox.checked) {
+        checkbox.checked = true;
+        return;
+      }
+
+      markTaskComplete(taskId, checkbox);
+    });
   }
 
   // --------------- Delete task from details modal ---------------
@@ -1642,9 +1819,8 @@
   }
 
   // ============================================================
-  // 🔎 SEARCH: live suggestions + apply filter
+  // 🔎 SEARCH
   // ============================================================
-
   const debounce = (fn, delay = 300) => {
     let timerId;
     return (...args) => {
@@ -1775,5 +1951,3 @@
     });
   }
 })();
-
-
