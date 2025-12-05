@@ -106,3 +106,22 @@ class Task(models.Model):
         if self.project:
             return f"[{self.project.name}] {self.title}"
         return self.title
+    
+
+
+class Tip(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="tips",
+    )
+    text = models.TextField()
+    category = models.CharField(max_length=50, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.category or 'Tip'}: {self.text[:40]}..."

@@ -480,3 +480,133 @@ class TaskCompleteApiView(LoginRequiredMixin, View):
               "stats": stats,
           }
       )
+  
+
+# --------------------------- Tip Views --------------------------
+import random
+from pathlib import Path
+
+from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.views.decorators.http import require_http_methods
+
+from .models import Tip
+
+# Helper to Load tips from tips_data.json in this app.
+def load_tips_from_file():
+    """
+    Load tips from tips_data.json inside the tasks app.
+    """
+    app_dir = Path(__file__).resolve().parent
+    tips_file = app_dir / "tips_data.json"
+
+    if not tips_file.exists():
+        return [
+            {"category": "general", "text": "No tips file found yet."}
+        ]
+
+    with tips_file.open("r", encoding="utf-8") as f:
+        return json.load(f)
+
+# Render the tip in the page
+@login_required
+def tips_page(request):
+    """
+    Render the Tips page.
+    Shows:
+      - current random tip (loaded via JS)
+      - list of saved tips for this user
+    """
+    saved_tips = Tip.objects.filter(user=request.user)
+
+    return render(request, "tasks/tips_page.html", {
+        "saved_tips": saved_tips,
+        "active_page": "tips",
+    })
+
+#  Returns a random tip from JSON as JSON.
+@login_required
+@require_http_methods(["GET"])
+def get_tip(request):
+    """
+    GET /tasks/api/tip/
+    Returns a random tip from JSON as JSON.
+    """
+    tips = load_tips_from_file()
+    tip = random.choice(tips) if tips else {"category": "general", "text": "No tips available."}
+
+    return JsonResponse(
+        {
+            "ok": True,
+            "tip": {
+                "text": tip.get("text", "No tip text."),
+                "category": tip.get("category", "general"),
+            },
+        }
+    )
+
+# ------------------ Save tip to the db --------------------
+@login_required
+@require_http_methods(["POST"])
+def save_tip(request):
+    """
+    POST /tasks/api/tip/save/
+    Save the currently shown tip text to the DB for this user.
+    Body: JSON or form with 'text' and optional 'category'.
+    """
+    try:
+        data = json.loads(request.body.decode("utf-8"))
+    except Exception:
+        data = request.POST
+
+    text = (data.get("text") or "").strip()
+    category = (data.get("category") or "").strip()
+
+    if not text:
+        return JsonResponse(
+            {"ok": False, "error": "Tip text is required."},
+            status=400,
+        )
+
+    tip = Tip.objects.create(
+        user=request.user,
+        text=text,
+        category=category,
+    )
+
+    return JsonResponse(
+        {
+            "ok": True,
+            "tip": {
+                "id": tip.id, # type: ignore
+                "text": tip.text,
+                "category": tip.category,
+                "created_at": tip.created_at.isoformat(),
+            },
+        },
+        status=201,
+    )
+
+# Helper to delete a tip 
+@login_required
+@require_http_methods(["POST"])  # you can switch to DELETE if you want
+def delete_tip(request, tip_id):
+    """
+    POST /tasks/api/tip/<tip_id>/delete/
+    Hard delete a saved tip for this user.
+    """
+    deleted_count, _ = Tip.objects.filter(
+        id=tip_id,
+        user=request.user,
+    ).delete()  # real delete
+
+    if deleted_count == 0:
+        return JsonResponse(
+            {"ok": False, "error": "Tip not found."},
+            status=404,
+        )
+
+    return JsonResponse({"ok": True})
+
+

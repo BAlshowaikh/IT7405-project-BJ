@@ -86,41 +86,28 @@
       <span>Projects</span>
     </a>
 
-    {# Teams #}
+
+  {# AI Tips #}
     <a
-      href=""
+      href="{% url 'tasks:tips_page' %}"
       class="group flex items-center gap-3 px-6 py-3 transition
-             hover:bg-slate-800/60
-             {% if active_page == 'teams' %}
+            hover:bg-slate-800/60
+            {% if active_page == 'tips' %}
               bg-white text-slate-900 rounded-full shadow-md -mr-4 ml-2
-             {% endif %}"
+            {% endif %}"
     >
       <iconify-icon
-        icon="solar:users-group-rounded-outline"
+        icon="solar:bulb-linear"
         class="text-lg
-               {% if active_page == 'teams' %}text-slate-900{% else %}text-slate-300{% endif %}"
+              {% if active_page == 'tips' %}text-slate-900{% else %}text-slate-300{% endif %}"
       ></iconify-icon>
-      <span>Teams</span>
+      <span>AI Tips</span>
     </a>
+
+
   </nav>
 
   {# Sign out at bottom #}
-  <!-- <div class="border-t border-slate-800 px-6 py-4">
-    <form method="post" action="{% url 'accounts:logout' %}" class="w-full">
-      {% csrf_token %}
-      <button
-        type="submit"
-        class="flex w-full items-center gap-3 text-sm font-medium text-slate-300
-               hover:text-red-300 hover:bg-slate-800/70 rounded-md px-3 py-2 transition"
-      >
-        <iconify-icon
-          icon="solar:logout-2-linear"
-          class="text-lg"
-        ></iconify-icon>
-        <span>Sign out</span>
-      </button>
-    </form>
-  </div> -->
   <div class="border-t border-slate-800 px-6 py-4">
   <a
     href="{% url 'accounts:logout' %}"

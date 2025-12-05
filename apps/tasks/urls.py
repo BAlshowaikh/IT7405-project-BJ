@@ -26,8 +26,10 @@ urlpatterns = [
 
     # Update status to done via checkbox
     path("api/tasks/<str:public_id>/complete/", views.TaskCompleteApiView.as_view(), name="api_complete"),
-
-
-    # Delete a task
-    # path("api/tasks/<str:public_id>/delete/", views.TaskDeleteApiView.as_view(), name="api_delete"),
+ 
+    # -------------- Tip paths ------------------
+    path("tips/", views.tips_page, name="tips_page"),
+    path("api/tip/", views.get_tip, name="get_tip_api"),
+    path("api/tip/save/", views.save_tip, name="save_tip_api"),
+    path("api/tip/<int:tip_id>/delete/", views.delete_tip, name="delete_tip_api"),
 ]
