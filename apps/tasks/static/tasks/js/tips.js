@@ -127,32 +127,39 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
           }
 
-          showSuccess("Tip saved.");
+        showSuccess("Tip saved.");
 
-          const tip = data.tip;
-          const row = document.createElement("tr");
-          row.setAttribute("data-tip-id", tip.id);
-          row.className = "hover:bg-slate-50";
+        const tip = data.tip;
+        const row = document.createElement("tr");
+        row.setAttribute("data-tip-id", tip.id);
+        row.className = "hover:bg-slate-50";
 
-          row.innerHTML = `
-            <td class="px-6 py-3 text-slate-800 align-top">
-              <p class="text-sm">${tip.text}</p>
-            </td>
-            <td class="px-6 py-3 text-slate-500 text-xs align-top whitespace-nowrap">
-              ${tip.created_at.slice(0, 19).replace("T", " ")}
-            </td>
-            <td class="px-6 py-3 text-right align-top">
-              <button
-                type="button"
-                class="inline-flex items-center justify-center rounded-full p-2 text-slate-400 hover:text-rose-500 delete-tip-btn"
-                title="Delete tip"
-              >
-                <iconify-icon icon="lucide:trash-2" class="text-lg"></iconify-icon>
-              </button>
-            </td>
-          `;
+        row.innerHTML = `
+          <td class="px-6 py-3 text-slate-800 align-top">
+            <p class="text-sm">${tip.text}</p>
+          </td>
+          <td class="px-6 py-3 text-slate-500 text-xs align-top whitespace-nowrap">
+            ${tip.created_at.slice(0, 19).replace("T", " ")}
+          </td>
+          <td class="px-6 py-3 text-right align-top">
+            <button
+              type="button"
+              class="inline-flex items-center justify-center rounded-full p-2 text-slate-400 hover:text-rose-500 delete-tip-btn"
+              title="Delete tip"
+            >
+              <iconify-icon icon="lucide:trash-2" class="text-lg"></iconify-icon>
+            </button>
+          </td>
+        `;
 
-          savedTipsTableBody.prepend(row);
+        //Remove the "No tips saved yet" row if it's still there
+        const emptyRow = document.getElementById("saved-tips-empty-row");
+        if (emptyRow) {
+          emptyRow.remove();
+        }
+
+        savedTipsTableBody.prepend(row);
+
         })
         .catch((err) => {
           console.error("Error saving tip:", err);

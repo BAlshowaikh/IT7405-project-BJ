@@ -16,23 +16,6 @@
 
   {# Main nav links #}
   <nav class="mt-4 flex-1 flex flex-col gap-1 text-sm font-medium">
-    {# Home #}
-    <a
-      href=""
-      class="group flex items-center gap-3 px-6 py-3 transition
-             hover:bg-slate-800/60
-             {% if active_page == 'home' %}
-              bg-white text-slate-900 rounded-full shadow-md -mr-4 ml-2
-             {% endif %}"
-    >
-      <iconify-icon
-        icon="solar:home-2-line-duotone"
-        class="text-lg
-               {% if active_page == 'home' %}text-slate-900{% else %}text-slate-300{% endif %}"
-      ></iconify-icon>
-      <span>Home</span>
-    </a>
-
     {# My Tasks #}
     <a
       href="{% url 'tasks:dashboard' %}"
@@ -50,59 +33,24 @@
       <span>My Tasks</span>
     </a>
 
-    {# Inbox #}
-    <a
-      href=""
-      class="group flex items-center gap-3 px-6 py-3 transition
-             hover:bg-slate-800/60
-             {% if active_page == 'inbox' %}
-              bg-white text-slate-900 rounded-full shadow-md -mr-4 ml-2
-             {% endif %}"
-    >
-      <iconify-icon
-        icon="solar:inbox-unread-line-duotone"
-        class="text-lg
-               {% if active_page == 'inbox' %}text-slate-900{% else %}text-slate-300{% endif %}"
-      ></iconify-icon>
-      <span>Inbox</span>
-    </a>
 
-    <div class="mt-4 border-t border-slate-200 pt-3"></div>
+{# AI Tips #}
+  <a
+    href="{% url 'tasks:tips_page' %}"
+    class="group flex items-center gap-3 px-6 py-3 transition
+          hover:bg-slate-800/60
+          {% if active_page == 'tips' %}
+            bg-white text-slate-900 rounded-full shadow-md -mr-4 ml-2
+          {% endif %}"
+  >
+    <iconify-icon
+      icon="mdi:lightbulb-outline"
+      class="text-lg
+            {% if active_page == 'tips' %}text-slate-900{% else %}text-slate-300{% endif %}"
+    ></iconify-icon>
+    <span>AI Tips</span>
+  </a>
 
-    {# Projects #}
-    <a
-      href=""
-      class="group flex items-center gap-3 px-6 py-3 transition
-             hover:bg-slate-800/60
-             {% if active_page == 'projects' %}
-              bg-white text-slate-900 rounded-full shadow-md -mr-4 ml-2
-             {% endif %}"
-    >
-      <iconify-icon
-        icon="mdi:cube-outline"
-        class="text-lg
-               {% if active_page == 'projects' %}text-slate-900{% else %}text-slate-300{% endif %}"
-      ></iconify-icon>
-      <span>Projects</span>
-    </a>
-
-
-  {# AI Tips #}
-    <a
-      href="{% url 'tasks:tips_page' %}"
-      class="group flex items-center gap-3 px-6 py-3 transition
-            hover:bg-slate-800/60
-            {% if active_page == 'tips' %}
-              bg-white text-slate-900 rounded-full shadow-md -mr-4 ml-2
-            {% endif %}"
-    >
-      <iconify-icon
-        icon="solar:bulb-linear"
-        class="text-lg
-              {% if active_page == 'tips' %}text-slate-900{% else %}text-slate-300{% endif %}"
-      ></iconify-icon>
-      <span>AI Tips</span>
-    </a>
 
 
   </nav>

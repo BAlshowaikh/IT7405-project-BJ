@@ -499,7 +499,7 @@ def load_tips_from_file():
     Load tips from tips_data.json inside the tasks app.
     """
     app_dir = Path(__file__).resolve().parent
-    tips_file = app_dir / "tips_data.json"
+    tips_file = app_dir / "tips-data.json"
 
     if not tips_file.exists():
         return [
@@ -512,18 +512,15 @@ def load_tips_from_file():
 # Render the tip in the page
 @login_required
 def tips_page(request):
-    """
-    Render the Tips page.
-    Shows:
-      - current random tip (loaded via JS)
-      - list of saved tips for this user
-    """
     saved_tips = Tip.objects.filter(user=request.user)
 
-    return render(request, "tasks/tips_page.html", {
+    context = {
         "saved_tips": saved_tips,
         "active_page": "tips",
-    })
+        "username": request.user.first_name or request.user.username,
+    }
+    return render(request, "tasks/tips_page.html", context)
+
 
 #  Returns a random tip from JSON as JSON.
 @login_required

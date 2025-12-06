@@ -7,7 +7,7 @@ User = get_user_model()
 
 
 class Task(models.Model):
-    # This will generated a public id (not the same as the id in db) which will be used for details, edit and delete
+    # This will generated a public id which will be used for details, edit and delete
     public_id = models.CharField(
         max_length=36,
         unique=True,

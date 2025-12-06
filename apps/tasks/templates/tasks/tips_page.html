@@ -3,15 +3,21 @@
 
 {% block content %}
 <div class="flex-1 bg-slate-50">
-  <div class="max-w-6xl mx-auto px-8 py-8">
+  <div class="px-10 py-10">
 
-    <!-- Page heading -->
-    <h1 class="text-2xl font-semibold text-slate-900 mb-6">
-      AI Tip of the Day
+  <header class="mb-8">
+    <h1 class="text-3xl font-semibold text-slate-900">
+      Tip Of Today
     </h1>
+    <p class="mt-1 text-sm text-slate-500">
+      Welcome back, {{ username }} 👋
+    </p>
+  </header>
 
     <!-- Top cards: Generator + Tip display -->
-    <div class="flex flex-col gap-6 max-w-2xl mx-auto mb-10">
+    <div class="flex flex-col gap-4 max-w-xl mx-auto mb-8">
+
+
       <!-- Generator card -->
       <div
         id="tip-generator-card"
@@ -147,14 +153,14 @@
                     </button>
                   </td>
                 </tr>
-              {% empty %}
-                <tr>
-                  <td colspan="3" class="px-6 py-6 text-center text-slate-400">
-                    No tips saved yet. Generate a tip and click
-                    <span class="font-medium text-slate-600">"Save Tip"</span>.
-                  </td>
-                </tr>
-              {% endfor %}
+                {% empty %}
+                  <tr id="saved-tips-empty-row">
+                    <td colspan="3" class="px-6 py-6 text-center text-slate-400">
+                      No tips saved yet. Generate a tip and click
+                      <span class="font-medium text-slate-600">"Save Tip"</span>.
+                    </td>
+                  </tr>
+                {% endfor %}
             </tbody>
           </table>
         </div>
