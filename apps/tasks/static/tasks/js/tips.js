@@ -205,6 +205,11 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
           }
           row.remove();
+
+          // success toast for tip delete
+          if (window.showToast) {
+            window.showToast("Tip deleted successfully!");
+          }
         })
         .catch((err) => {
           console.error("Error deleting tip:", err);

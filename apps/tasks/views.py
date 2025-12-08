@@ -587,7 +587,7 @@ def save_tip(request):
 
 # Helper to delete a tip 
 @login_required
-@require_http_methods(["POST"])  # you can switch to DELETE if you want
+@require_http_methods(["POST"]) 
 def delete_tip(request, tip_id):
     """
     POST /tasks/api/tip/<tip_id>/delete/
@@ -596,7 +596,7 @@ def delete_tip(request, tip_id):
     deleted_count, _ = Tip.objects.filter(
         id=tip_id,
         user=request.user,
-    ).delete()  # real delete
+    ).delete()  
 
     if deleted_count == 0:
         return JsonResponse(

@@ -27,8 +27,60 @@
         </header>
 
         <section class="p-8">
-          {% block content %}{% endblock %}
+          {% block content %}
+          {% endblock %}
         </section>
+
+        <!-- Global toast notification -->
+        <div
+          id="global-toast-overlay"
+          class="fixed inset-0 flex items-center justify-center z-50 bg-slate-900/40 transition-opacity duration-300"
+          style="display: none; opacity: 0;"
+        >
+          <div
+            id="global-toast"
+            class="bg-slate-900 text-white px-6 py-3 rounded-2xl shadow-xl flex items-center gap-3"
+          >
+            <span
+              class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-400"
+            >
+              <iconify-icon icon="mdi:check" class="text-xl"></iconify-icon>
+            </span>
+            <p id="global-toast-message" class="text-sm font-semibold"></p>
+          </div>
+        </div>
+
+        <script>
+          // Simple global toast: window.showToast("message")
+          window.showToast = function (message) {
+            const overlay = document.getElementById("global-toast-overlay");
+            const msgEl = document.getElementById("global-toast-message");
+            if (!overlay || !msgEl) return;
+
+            msgEl.textContent = message || "";
+
+            // show: make it flex + fade in
+            overlay.style.display = "flex";
+            // force a repaint so transition runs
+            requestAnimationFrame(() => {
+              overlay.style.opacity = "1";
+            });
+
+            // hide after 5s
+            if (window.__toastTimer) {
+              clearTimeout(window.__toastTimer);
+            }
+
+            window.__toastTimer = setTimeout(() => {
+              overlay.style.opacity = "0";
+              setTimeout(() => {
+                overlay.style.display = "none";
+              }, 300); // 
+            }, 3000);
+          };
+        </script>
+
+
       </main>
     </div>
     {% block extra_scripts %}{% endblock %}

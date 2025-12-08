@@ -511,6 +511,12 @@
 
         await loadTasks(currentStatusFilter, currentSearchQuery);
         closePanel();
+
+        // Show confirmation message
+        if (window.showToast) {
+          window.showToast("A new task is added successfully!");
+        }
+
       } catch (err) {
         errorEl.textContent = "Network error. Please try again.";
         errorEl.classList.remove("hidden");
@@ -825,6 +831,11 @@
         }
 
         closeEditPanel();
+
+        // Show edit successfully message
+        if (window.showToast) {
+        window.showToast("Task updated successfully!");
+        }
       } catch (err) {
         console.error("Error updating task", err);
         if (editErrorEl) {
