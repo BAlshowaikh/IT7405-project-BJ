@@ -1,7 +1,7 @@
 from django.urls import path
 
 # Import the views (controller) from the views file inside account folder
-from .views import SignUpView, SignInView, LogoutView, landing_page
+from .views import SignUpView, SignInView, LogoutView, profile_view
 
 # So the main route will start with "accounts"
 app_name = "accounts"
@@ -19,4 +19,5 @@ urlpatterns = [
     path("signup/", SignUpView.as_view(), name="signup"),
     path("login/", SignInView.as_view(), name="login"),
     path("logout/", LogoutView.as_view(), name="logout"),
+    path("profile/", profile_view, name="profile"),
 ]

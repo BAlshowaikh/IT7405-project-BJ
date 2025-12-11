@@ -21,9 +21,11 @@
       <main class="flex-1 bg-slate-50">
         <header class="h-16 border-b flex items-center justify-end px-8 bg-[#20222F]">
           {# Placeholder top-right avatar, etc. #}
-          <div class="h-9 w-9 rounded-full bg-slate-200 flex items-center justify-center">
+        <a href="{% url 'accounts:profile' %}" class="block">
+          <div class="h-9 w-9 rounded-full bg-slate-200 flex items-center justify-center hover:bg-slate-300 transition">
             <iconify-icon icon="solar:user-circle-line-duotone" class="text-xl text-slate-500"></iconify-icon>
           </div>
+        </a>
         </header>
 
         <section class="p-8">

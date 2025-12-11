@@ -1,0 +1,224 @@
+{% extends "base_app.html" %}
+
+{% block title %}Profile – CoHub{% endblock %}
+
+{% block content %}
+<div class="flex-1 bg-slate-50">
+  <div class="px-10 py-10 max-w-5xl mx-auto">
+
+    <header class="mb-8 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div>
+        <h1 class="text-2xl font-semibold text-slate-900 flex items-center gap-2">
+          <span
+            class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-100 text-sky-600"
+          >
+            <iconify-icon icon="lucide:user-2" class="text-lg"></iconify-icon>
+          </span>
+          <span>Your Profile</span>
+        </h1>
+        <p class="mt-1 text-sm text-slate-500">
+          Manage your account information, email, and password in one place.
+        </p>
+      </div>
+
+      <div
+        class="inline-flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-2 shadow-sm"
+      >
+        <div class="h-9 w-9 rounded-full bg-slate-900 text-slate-50 flex items-center justify-center text-sm font-semibold">
+          {{ request.user.username|first|upper }}
+        </div>
+        <div class="flex flex-col">
+          <span class="text-xs uppercase tracking-[0.16em] text-slate-400">
+            Signed in as
+          </span>
+          <span class="text-sm font-medium text-slate-900">
+            {{ request.user.username }}
+          </span>
+          {% if request.user.email %}
+            <span class="text-xs text-slate-500">
+              {{ request.user.email }}
+            </span>
+          {% endif %}
+        </div>
+      </div>
+    </header>
+
+    {# Messages (success, errors) #}
+    {% if messages %}
+      <div class="space-y-2 mb-6">
+        {% for message in messages %}
+          <div
+            class="flex items-start gap-2 rounded-xl px-4 py-2 text-sm border
+            {% if message.tags == 'success' %}
+              bg-emerald-50 text-emerald-700 border-emerald-200
+            {% elif message.tags == 'error' %}
+              bg-red-50 text-red-700 border-red-200
+            {% else %}
+              bg-slate-50 text-slate-700 border-slate-200
+            {% endif %}"
+          >
+            <span class="mt-[2px]">
+              {% if message.tags == 'success' %}
+                <iconify-icon icon="lucide:check-circle-2" class="text-base"></iconify-icon>
+              {% elif message.tags == 'error' %}
+                <iconify-icon icon="lucide:alert-circle" class="text-base"></iconify-icon>
+              {% else %}
+                <iconify-icon icon="lucide:info" class="text-base"></iconify-icon>
+              {% endif %}
+            </span>
+            <span>{{ message }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+      {# Profile info (username + email) #}
+      <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-slate-100">
+          <div>
+            <h2 class="text-sm font-semibold text-slate-900">
+              Account Information
+            </h2>
+            <p class="mt-1 text-xs text-slate-500">
+              Update your username and email address.
+            </p>
+          </div>
+          <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-slate-50">
+            <iconify-icon icon="lucide:id-card" class="text-sm"></iconify-icon>
+          </span>
+        </div>
+
+        <form method="post" class="space-y-4 px-6 pb-5 pt-4">
+          {% csrf_token %}
+          <input type="hidden" name="profile_submit" value="1">
+
+          {{ profile_form.non_field_errors }}
+
+          <div class="space-y-1">
+            <label for="{{ profile_form.username.id_for_label }}" class="block text-xs font-medium text-slate-600">
+              Username
+            </label>
+            {{ profile_form.username }}
+            {% if profile_form.username.errors %}
+              <p class="text-xs text-red-500 mt-1">
+                {{ profile_form.username.errors.0 }}
+              </p>
+            {% endif %}
+            <p class="mt-1 text-[11px] text-slate-400">
+              This is how your name will appear across CoHub.
+            </p>
+          </div>
+
+          <div class="space-y-1">
+            <label for "{{ profile_form.email.id_for_label }}" class="block text-xs font-medium text-slate-600">
+              Email
+            </label>
+            {{ profile_form.email }}
+            {% if profile_form.email.errors %}
+              <p class="text-xs text-red-500 mt-1">
+                {{ profile_form.email.errors.0 }}
+              </p>
+            {% endif %}
+            <p class="mt-1 text-[11px] text-slate-400">
+              Used for notifications and password reset.
+            </p>
+          </div>
+
+          <div class="pt-3 flex items-center justify-between gap-3">
+            <p class="text-[11px] text-slate-400">
+              Last updated just now after you save changes.
+            </p>
+            <button
+              type="submit"
+              class="inline-flex items-center justify-center rounded-full bg-sky-600 px-4 py-2 text-xs font-semibold
+                     text-white shadow-sm hover:bg-sky-500
+                     focus:outline-none focus:ring-2 focus:ring-sky-400 focus:ring-offset-2 focus:ring-offset-slate-50"
+            >
+              <iconify-icon icon="lucide:save" class="mr-1.5 text-[13px]"></iconify-icon>
+              Save changes
+            </button>
+          </div>
+        </form>
+      </section>
+
+      {# Change password #}
+      <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+        <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-slate-100">
+          <div>
+            <h2 class="text-sm font-semibold text-slate-900">
+              Change Password
+            </h2>
+            <p class="mt-1 text-xs text-slate-500">
+              Choose a strong password to keep your account secure.
+            </p>
+          </div>
+          <span class="inline-flex h-8 w-8 items-center justify-center rounded-full bg-slate-900 text-slate-50">
+            <iconify-icon icon="lucide:key-round" class="text-sm"></iconify-icon>
+          </span>
+        </div>
+
+        <form method="post" class="space-y-4 px-6 pb-5 pt-4">
+          {% csrf_token %}
+          <input type="hidden" name="password_submit" value="1">
+
+          {{ password_form.non_field_errors }}
+
+          <div class="space-y-1">
+            <label for="{{ password_form.old_password.id_for_label }}" class="block text-xs font-medium text-slate-600">
+              Current password
+            </label>
+            {{ password_form.old_password }}
+            {% if password_form.old_password.errors %}
+              <p class="text-xs text-red-500 mt-1">
+                {{ password_form.old_password.errors.0 }}
+              </p>
+            {% endif %}
+          </div>
+
+          <div class="space-y-1">
+            <label for="{{ password_form.new_password1.id_for_label }}" class="block text-xs font-medium text-slate-600">
+              New password
+            </label>
+            {{ password_form.new_password1 }}
+            {% if password_form.new_password1.errors %}
+              <p class="text-xs text-red-500 mt-1">
+                {{ password_form.new_password1.errors.0 }}
+              </p>
+            {% endif %}
+          </div>
+
+          <div class="space-y-1">
+            <label for="{{ password_form.new_password2.id_for_label }}" class="block text-xs font-medium text-slate-600">
+              Confirm new password
+            </label>
+            {{ password_form.new_password2 }}
+            {% if password_form.new_password2.errors %}
+              <p class="text-xs text-red-500 mt-1">
+                {{ password_form.new_password2.errors.0 }}
+              </p>
+            {% endif %}
+          </div>
+
+          <div class="pt-3 flex items-center justify-between gap-3">
+            <p class="text-[11px] text-slate-400 max-w-[220px]">
+              Tip: Use at least 8 characters with a mix of letters, numbers, and symbols.
+            </p>
+            <button
+              type="submit"
+              class="inline-flex items-center justify-center rounded-full bg-slate-900 px-4 py-2 text-xs font-semibold
+                     text-white shadow-sm hover:bg-slate-800
+                     focus:outline-none focus:ring-2 focus:ring-slate-700 focus:ring-offset-2 focus:ring-offset-slate-50"
+            >
+              <iconify-icon icon="lucide:shield-check" class="mr-1.5 text-[13px]"></iconify-icon>
+              Update password
+            </button>
+          </div>
+        </form>
+      </section>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
