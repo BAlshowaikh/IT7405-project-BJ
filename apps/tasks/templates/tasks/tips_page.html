@@ -5,23 +5,25 @@
 <div class="flex-1 bg-slate-50">
   <div class="px-10 py-10">
 
-  <header class="mb-8">
-    <h1 class="text-3xl font-semibold text-slate-900">
-      Tip Of Today
-    </h1>
-    <p class="mt-1 text-sm text-slate-500">
-      Welcome back, {{ username }} 👋
-    </p>
-  </header>
+    <header class="mb-8">
+      <h1 class="text-3xl font-semibold text-slate-900">
+        Tip Of Today
+      </h1>
+      <p class="mt-1 text-sm text-slate-500">
+        Welcome back, {{ username }} 👋
+      </p>
+    </header>
 
-    <!-- Top cards: Generator + Tip display -->
-    <div class="flex flex-col gap-4 max-w-xl mx-auto mb-8">
-
+    <!-- Layout wrapper for generator + tip card -->
+    <div
+      id="tips-layout"
+      class="flex flex-col items-center gap-4 max-w-4xl mx-auto mb-8"
+    >
 
       <!-- Generator card -->
       <div
         id="tip-generator-card"
-        class="rounded-3xl bg-white shadow-md border border-slate-200 px-8 py-6 flex flex-col items-center text-center"
+        class="w-full md:w-1/2 rounded-3xl bg-white shadow-md border border-slate-200 px-8 py-6 flex flex-col items-center text-center"
       >
         <div class="flex items-center gap-2 mb-3">
           <span
@@ -60,7 +62,7 @@
       <!-- Tip display card (hidden until first tip is loaded) -->
       <div
         id="tip-display-card"
-        class="rounded-3xl bg-white shadow-md border border-slate-200 px-8 py-6 flex flex-col gap-4 hidden"
+        class="w-full md:w-1/2 rounded-3xl bg-white shadow-md border border-slate-200 px-8 py-6 flex flex-col gap-4 hidden"
       >
         <div class="flex items-center justify-between">
           <span class="text-sm font-semibold text-slate-700">
@@ -82,9 +84,7 @@
         <p
           id="tip-text"
           class="text-sm leading-relaxed text-slate-800"
-        >
-          <!-- Tip text will be injected here -->
-        </p>
+        ></p>
 
         <div class="flex items-center justify-between mt-2">
           <p
@@ -109,6 +109,7 @@
           class="mt-2 text-xs text-emerald-600 hidden"
         ></p>
       </div>
+
     </div>
 
     <!-- Saved Tips table -->
@@ -118,7 +119,6 @@
       </h2>
 
       <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
-        <!-- Scrollable area for the table -->
         <div class="max-h-52 overflow-y-auto">
           <table class="min-w-full text-sm">
             <thead
@@ -133,10 +133,7 @@
 
             <tbody id="saved-tips-table-body" class="divide-y divide-slate-100">
               {% for tip in saved_tips %}
-                <tr
-                  data-tip-id="{{ tip.id }}"
-                  class="hover:bg-slate-50"
-                >
+                <tr data-tip-id="{{ tip.id }}" class="hover:bg-slate-50">
                   <td class="px-6 py-3 text-slate-800 align-top">
                     <p class="text-sm">{{ tip.text }}</p>
                   </td>
@@ -153,23 +150,22 @@
                     </button>
                   </td>
                 </tr>
-                {% empty %}
-                  <tr id="saved-tips-empty-row">
-                    <td colspan="3" class="px-6 py-6 text-center text-slate-400">
-                      No tips saved yet. Generate a tip and click
-                      <span class="font-medium text-slate-600">"Save Tip"</span>.
-                    </td>
-                  </tr>
-                {% endfor %}
+              {% empty %}
+                <tr id="saved-tips-empty-row">
+                  <td colspan="3" class="px-6 py-6 text-center text-slate-400">
+                    No tips saved yet. Generate a tip and click
+                    <span class="font-medium text-slate-600">"Save Tip"</span>.
+                  </td>
+                </tr>
+              {% endfor %}
             </tbody>
           </table>
         </div>
       </div>
     </section>
+
   </div>
 </div>
+
 <script src="{% static 'tasks/js/tips.js' %}" defer></script>
 {% endblock content %}
-<!-- 
-{% block extra_js %}
-{% endblock extra_js %} -->
