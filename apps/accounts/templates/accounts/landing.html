@@ -1,0 +1,514 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>CoHub – Finally, Get Your To-Do List Done</title>
+
+    <!-- Tailwind (same style as your app) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Iconify (for small icons) -->
+    <script src="https://code.iconify.design/iconify-icon/1.0.7/iconify-icon.min.js"></script>
+    <!-- GSAP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+
+    <style>
+      /* Animated gradient background */
+      .animated-bg {
+        background: radial-gradient(circle at 0% 0%, #415bdd 0, transparent 45%),
+                    radial-gradient(circle at 100% 0%, #00559b 0, transparent 45%),
+                    radial-gradient(circle at 0% 100%, #6366f1 0, transparent 45%),
+                    radial-gradient(circle at 100% 100%, #0f172a 0, #020617 40%);
+        background-size: 200% 200%;
+        animation: gradientShift 22s ease-in-out infinite;
+      }
+
+      @keyframes gradientShift {
+        0%   { background-position: 0% 0%; }
+        25%  { background-position: 100% 0%; }
+        50%  { background-position: 100% 100%; }
+        75%  { background-position: 0% 100%; }
+        100% { background-position: 0% 0%; }
+      }
+
+      /* Glassy hero panel */
+      .glass-panel {
+        backdrop-filter: blur(18px);
+        background: rgba(15, 23, 42, 0.82);
+      }
+
+      /* Fake dashboard stripes */
+      .mini-pill {
+        background-image: linear-gradient(90deg, #22c55e33, #22c55e99);
+      }
+    </style>
+  </head>
+
+  <body class="min-h-screen text-slate-50 animated-bg">
+    <!-- Top nav -->
+    <header class="border-b border-slate-800/60 bg-slate-900/40 backdrop-blur-md">
+      <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <div class="h-9 w-9 rounded-xl bg-slate-800 flex items-center justify-center">
+            <img
+              src="{% static 'images/cohub-logo.png' %}"
+              alt="CoHub"
+              class="h-7 w-7 object-contain"
+            />
+          </div>
+          <span class="font-semibold tracking-wide text-slate-100 text-lg">
+            CoHub
+          </span>
+        </div>
+
+        <nav class="hidden md:flex items-center gap-8 text-sm text-slate-200">
+          <a href="#features" class="hover:text-sky-300 transition">Features</a>
+          <a href="#trust" class="hover:text-sky-300 transition">Why CoHub</a>
+          <a href="#faq" class="hover:text-sky-300 transition">FAQ</a>
+
+          <a
+            href="{% url 'accounts:login' %}"
+            class="text-slate-200 hover:text-white transition"
+          >
+            Sign in
+          </a>
+
+          <!-- Primary CTA in nav -->
+          <a
+            href="{% url 'accounts:signup' %}"
+            class="px-4 py-2 rounded-full bg-sky-500 hover:bg-sky-400 text-sm font-semibold shadow-lg shadow-sky-500/30 nav-cta"
+          >
+            Start Organizing for Free
+          </a>
+        </nav>
+
+        <!-- Mobile CTA only -->
+        <a
+          href="{% url 'accounts:signup' %}"
+          class="md:hidden inline-flex items-center justify-center px-4 py-2 rounded-full bg-sky-500 text-xs font-semibold shadow-lg shadow-sky-500/30 nav-cta"
+        >
+          Get Started
+        </a>
+      </div>
+    </header>
+
+    <!-- HERO -->
+    <main class="max-w-6xl mx-auto px-6 pt-14 pb-16">
+      <section class="grid md:grid-cols-[1.1fr,0.9fr] gap-10 items-center hero-section">
+        <!-- Left column: headline & CTA -->
+        <div class="space-y-6">
+          <p class="uppercase tracking-[0.2em] text-xs text-sky-200/80 hero-eyebrow">
+            Personal Task & Project Hub
+          </p>
+
+          <h1
+            class="hero-heading text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight text-slate-50"
+          >
+            Finally, get your to-do list
+            <span class="text-sky-400">done</span>.
+          </h1>
+
+          <p class="hero-sub text-base text-slate-200/80 max-w-xl">
+            CoHub is the easiest way to capture tasks, switch between uni projects,
+            and actually finish what matters — without messy spreadsheets and
+            sticky notes everywhere.
+          </p>
+
+          <div class="flex flex-wrap items-center gap-4 hero-ctas">
+            <a
+              href="{% url 'accounts:signup' %}"
+              class="inline-flex items-center justify-center px-6 py-3 rounded-full
+                     bg-sky-500 hover:bg-sky-400 text-sm font-semibold shadow-xl shadow-sky-500/40"
+            >
+              Start Organizing For Free
+              <iconify-icon
+                icon="mdi:arrow-right"
+                class="ml-2 text-lg"
+              ></iconify-icon>
+            </a>
+
+          </div>
+
+          <!-- Quick stats / social proof -->
+          <div class="flex flex-wrap gap-6 text-xs text-slate-200/80 hero-metadata">
+            <div class="flex items-center gap-2">
+              <span class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <p>Live task dashboard · always synced</p>
+            </div>
+            <div class="flex items-center gap-2">
+              <iconify-icon icon="mdi:check-circle-outline" class="text-emerald-300"></iconify-icon>
+              <p>Perfect for uni projects & personal goals</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right column: glass mockup / illustration -->
+        <div class="relative h-full">
+          <!-- floating background blobs -->
+          <div
+            class="orb absolute -top-10 -right-4 h-32 w-32 rounded-full bg-sky-400/40 blur-2xl"
+          ></div>
+          <div
+            class="orb absolute bottom-0 -left-10 h-28 w-28 rounded-full bg-emerald-400/40 blur-2xl"
+          ></div>
+
+          <!-- Glass card showing mini dashboard -->
+          <div
+            class="glass-panel rounded-3xl border border-slate-700/70 p-5 shadow-2xl relative hero-card"
+          >
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <p class="text-xs text-slate-300/80 mb-1">Today</p>
+                <p class="text-lg font-semibold text-slate-50">My Tasks Overview</p>
+              </div>
+              <span
+                class="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-3 py-1 text-[11px] text-emerald-300"
+              >
+                <span class="h-2 w-2 rounded-full bg-emerald-300"></span>
+                On track
+              </span>
+            </div>
+
+            <!-- mini stats -->
+            <div class="grid grid-cols-3 gap-3 text-[11px] mb-4">
+              <div class="rounded-xl bg-slate-800/80 px-3 py-3">
+                <p class="text-slate-300/70 mb-1">In Progress</p>
+                <p class="text-xl font-semibold text-sky-300">4</p>
+              </div>
+              <div class="rounded-xl bg-slate-800/80 px-3 py-3">
+                <p class="text-slate-300/70 mb-1">Completed</p>
+                <p class="text-xl font-semibold text-emerald-300">9</p>
+              </div>
+              <div class="rounded-xl bg-slate-800/80 px-3 py-3">
+                <p class="text-slate-300/70 mb-1">Due Today</p>
+                <p class="text-xl font-semibold text-rose-300">2</p>
+              </div>
+            </div>
+
+            <!-- mini task list -->
+            <div class="space-y-2">
+              <div
+                class="flex items-center justify-between rounded-xl bg-slate-800/60 px-3 py-2 text-[11px]"
+              >
+                <div class="flex items-center gap-2">
+                  <span
+                    class="inline-flex h-4 w-4 items-center justify-center rounded border border-slate-500"
+                  ></span>
+                  <p class="text-slate-100">Finish research report</p>
+                </div>
+                <span
+                  class="inline-flex px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-200 text-[10px]"
+                >
+                  Today
+                </span>
+              </div>
+
+              <div
+                class="flex items-center justify-between rounded-xl bg-slate-800/40 px-3 py-2 text-[11px]"
+              >
+                <div class="flex items-center gap-2">
+                  <span
+                    class="inline-flex h-4 w-4 items-center justify-center rounded-full bg-emerald-500/70"
+                  >
+                    <iconify-icon
+                      icon="mdi:check"
+                      class="text-[10px] text-slate-900"
+                    ></iconify-icon>
+                  </span>
+                  <p class="text-slate-200 line-through">Submit project proposal</p>
+                </div>
+                <span
+                  class="inline-flex px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-200 text-[10px]"
+                >
+                  Done
+                </span>
+              </div>
+
+              <div
+                class="flex items-center justify-between rounded-xl bg-slate-800/50 px-3 py-2 text-[11px]"
+              >
+                <div class="flex items-center gap-2">
+                  <span
+                    class="inline-flex h-4 w-4 items-center justify-center rounded border border-slate-500"
+                  ></span>
+                  <p class="text-slate-100">Plan next sprint tasks</p>
+                </div>
+                <span
+                  class="inline-flex px-2 py-0.5 rounded-full mini-pill text-emerald-50 text-[10px]"
+                >
+                  Focus
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FEATURES / VALUE -->
+      <section id="features" class="mt-20">
+        <div class="flex items-center justify-between mb-6">
+          <div>
+            <p class="text-xs uppercase tracking-[0.2em] text-sky-200/80">
+              Why you’ll actually use it
+            </p>
+            <h2 class="text-2xl md:text-3xl font-semibold text-slate-50 mt-2">
+              Built for busy students and makers.
+            </h2>
+          </div>
+
+          <!-- Secondary CTA -->
+          <a
+            href="{% url 'accounts:signup' %}"
+            class="hidden md:inline-flex items-center px-5 py-2 rounded-full bg-slate-900 text-sm font-medium text-slate-50 border border-slate-600 hover:bg-slate-800 feature-secondary-cta"
+          >
+            Start Organizing For Free
+          </a>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-6">
+          <!-- Benefit 1 -->
+          <div
+            class="feature-card rounded-2xl bg-slate-900/70 border border-slate-700/70 p-5 shadow-lg"
+          >
+            <div
+              class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-sky-500/15 text-sky-300 mb-3"
+            >
+              <iconify-icon icon="mdi:cloud-sync-outline" class="text-lg"></iconify-icon>
+            </div>
+            <h3 class="text-base font-semibold text-slate-50 mb-2">
+              Stay synced across everything
+            </h3>
+            <p class="text-sm text-slate-300/90">
+              Capture tasks from any device and see the same clean dashboard when you
+              log in — no manual “syncing” or version confusion.
+            </p>
+          </div>
+
+          <!-- Benefit 2 -->
+          <div
+            class="feature-card rounded-2xl bg-slate-900/70 border border-slate-700/70 p-5 shadow-lg"
+          >
+            <div
+              class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500/15 text-emerald-300 mb-3"
+            >
+              <iconify-icon icon="mdi:flash-outline" class="text-lg"></iconify-icon>
+            </div>
+            <h3 class="text-base font-semibold text-slate-50 mb-2">
+              Input tasks in seconds
+            </h3>
+            <p class="text-sm text-slate-300/90">
+              Add tasks with clear priorities and due dates in a single panel, so you
+              spend time finishing work, not formatting it.
+            </p>
+          </div>
+
+          <!-- Benefit 3 -->
+          <div
+            class="feature-card rounded-2xl bg-slate-900/70 border border-slate-700/70 p-5 shadow-lg"
+          >
+            <div
+              class="inline-flex h-9 w-9 items-center justify-center rounded-full bg-amber-500/15 text-amber-300 mb-3"
+            >
+              <iconify-icon icon="mdi:chart-timeline-variant" class="text-lg"></iconify-icon>
+            </div>
+            <h3 class="text-base font-semibold text-slate-50 mb-2">
+              Feel accomplished every day
+            </h3>
+            <p class="text-sm text-slate-300/90">
+              See your week’s stats and “Done” tasks at a glance. CoHub turns your
+              progress into motivation instead of stress.
+            </p>
+          </div>
+        </div>
+
+        <!-- Mobile secondary CTA under features -->
+        <div class="mt-8 md:hidden text-center">
+          <a
+            href="{% url 'accounts:signup' %}"
+            class="inline-flex items-center justify-center px-6 py-3 rounded-full bg-slate-900 text-sm font-semibold text-slate-50 border border-slate-600 hover:bg-slate-800"
+          >
+            Start Organizing For Free
+          </a>
+        </div>
+      </section>
+
+      <!-- TRUST / SOCIAL PROOF -->
+      <section id="trust" class="mt-20">
+        <div
+          class="rounded-3xl bg-slate-900/70 border border-slate-700/70 p-6 md:p-8 flex flex-col md:flex-row gap-6 items-center trust-band"
+        >
+          <div class="flex-1 space-y-2">
+            <p class="text-xs uppercase tracking-[0.25em] text-sky-200/80">
+              Trusted by busy people
+            </p>
+            <h3 class="text-xl md:text-2xl font-semibold text-slate-50">
+              CoHub helps students, developers, and creators stay on top of their
+              chaos.
+            </h3>
+            <p class="text-sm text-slate-300/90">
+              “Having my personal tasks and project tasks in one clean view makes it
+              so much easier to decide what to do next.”
+            </p>
+          </div>
+
+          <div class="flex-1 flex flex-col gap-4 md:items-end">
+            <div class="flex items-center gap-4">
+              <div class="flex -space-x-2">
+                <div class="h-8 w-8 rounded-full bg-sky-500/80 border border-slate-900"></div>
+                <div class="h-8 w-8 rounded-full bg-emerald-500/80 border border-slate-900"></div>
+                <div class="h-8 w-8 rounded-full bg-indigo-500/80 border border-slate-900"></div>
+              </div>
+              <p class="text-sm text-slate-200/90">
+                Trusted by <span class="font-semibold text-sky-300">1,500+</span> organized
+                users.
+              </p>
+            </div>
+
+            <div class="flex gap-6 text-xs text-slate-400/90">
+              <span class="flex items-center gap-1">
+                <iconify-icon icon="mdi:shield-check-outline"></iconify-icon>
+                No spam. No dark patterns.
+              </span>
+              <span class="flex items-center gap-1">
+                <iconify-icon icon="mdi:lock-outline"></iconify-icon>
+                Your tasks stay yours.
+              </span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ / FOOTER LINKS -->
+      <section id="faq" class="mt-16 mb-10">
+        <div class="grid md:grid-cols-2 gap-10">
+          <div>
+            <h4 class="text-lg font-semibold text-slate-50 mb-3">FAQ / Help</h4>
+            <ul class="space-y-3 text-sm text-slate-300/90">
+              <li>
+                <span class="font-medium text-slate-100">Do I have to pay?</span><br />
+                CoHub is built as a uni project and currently free to use.
+              </li>
+              <li>
+                <span class="font-medium text-slate-100">Can I track different projects?</span
+                ><br />
+                Yes. Switch between personal tasks and project tasks from the same
+                dashboard.
+              </li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 class="text-lg font-semibold text-slate-50 mb-3">Contact & Legal</h4>
+            <div class="space-y-2 text-sm text-slate-300/90">
+              <p>
+                <span class="font-medium text-slate-100">Contact Us:</span>
+                <a href="mailto:support@cohub.app" class="text-sky-300 hover:text-sky-200">
+                  support@cohub.app
+                </a>
+              </p>
+              <p>
+                <a href="#" class="hover:text-sky-200">Terms of Service</a> ·
+                <a href="#" class="hover:text-sky-200">Privacy Policy</a>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <p class="mt-8 text-xs text-slate-400/80 border-t border-slate-700/60 pt-4 text-center">
+          &copy; {{ now|date:"Y" }} CoHub. Built as a university project and productivity
+          playground.
+        </p>
+      </section>
+    </main>
+
+    <!-- GSAP animations -->
+    <script>
+      gsap.registerPlugin(ScrollTrigger);
+
+      // Hero entrance
+      gsap.from(".hero-eyebrow", {
+        y: 20,
+        opacity: 0,
+        duration: 0.6,
+        delay: 0.1,
+        ease: "power2.out",
+      });
+
+      gsap.from(".hero-heading", {
+        y: 30,
+        opacity: 0,
+        duration: 0.8,
+        delay: 0.2,
+        ease: "power3.out",
+      });
+
+      gsap.from(".hero-sub", {
+        y: 20,
+        opacity: 0,
+        duration: 0.7,
+        delay: 0.35,
+        ease: "power2.out",
+      });
+
+      gsap.from(".hero-ctas", {
+        y: 20,
+        opacity: 0,
+        duration: 0.7,
+        delay: 0.45,
+        ease: "power2.out",
+      });
+
+      gsap.from(".hero-metadata", {
+        y: 20,
+        opacity: 0,
+        duration: 0.7,
+        delay: 0.55,
+        ease: "power2.out",
+      });
+
+      // Hero card & orbs
+      gsap.from(".hero-card", {
+        x: 40,
+        opacity: 0,
+        duration: 0.9,
+        delay: 0.35,
+        ease: "power3.out",
+      });
+
+      gsap.to(".orb", {
+        y: 30,
+        duration: 6,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut",
+        stagger: 0.4,
+      });
+
+      // Features section
+      gsap.from(".feature-card", {
+        scrollTrigger: {
+          trigger: "#features",
+          start: "top 75%",
+        },
+        y: 40,
+        opacity: 0,
+        duration: 0.7,
+        ease: "power2.out",
+        stagger: 0.15,
+      });
+
+      // Trust band
+      gsap.from(".trust-band", {
+        scrollTrigger: {
+          trigger: "#trust",
+          start: "top 80%",
+        },
+        y: 40,
+        opacity: 0,
+        duration: 0.8,
+        ease: "power2.out",
+      });
+    </script>
+  </body>
+</html>

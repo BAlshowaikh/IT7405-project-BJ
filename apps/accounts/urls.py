@@ -1,7 +1,7 @@
 from django.urls import path
 
 # Import the views (controller) from the views file inside account folder
-from .views import SignUpView, SignInView, LogoutView
+from .views import SignUpView, SignInView, LogoutView, landing_page
 
 # So the main route will start with "accounts"
 app_name = "accounts"

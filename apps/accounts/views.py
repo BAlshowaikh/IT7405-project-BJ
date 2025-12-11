@@ -1,7 +1,3 @@
-from typing import Any
-from django.http import HttpRequest
-from django.http.response import HttpResponse as HttpResponse
-from django.shortcuts import render
 
 # NOTES:
 # login, logout → Django’s built-in functions to log users in/out.
@@ -12,12 +8,16 @@ from django.shortcuts import render
 # FormView → generic CBV for forms (we use it for login & signup).
 # View → base class for simple custom views (we use it for logout).
 
-
+from typing import Any
+from django.http import HttpRequest
+from django.http.response import HttpResponse as HttpResponse
+from django.shortcuts import render
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
 from django.views.generic import FormView, View
+
 
 # Sign Up view
 # First, this class will inherite from the built in "FormView" class
@@ -100,9 +100,12 @@ class SignInView(FormView):
         login(self.request, user)
         return super().form_valid(form)
 
+# --------------------- Landing function -----------------------
+def landing_page(request):
+    return render(request, "accounts/landing.html")
+
 # --------------------- Logout view -----------------------
 class LogoutView(View):
-
     def get(self, request, *args, **kwargs):
         logout(request)
-        return redirect("accounts:login")
+        return redirect("landing")

@@ -16,12 +16,14 @@ Including another URLconf
 from django.contrib import admin
 from django.shortcuts import redirect
 from django.urls import include, path
+from apps.accounts.views import landing_page 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path("", landing_page, name="landing"), 
     path("accounts/", include("apps.accounts.urls")),
     path("tasks/", include("apps.tasks.urls")),
 
-    # When u get a / url, redirect user to login
-    path("", lambda request: redirect("accounts:login"), name="root_redirect"),
+
+    # path("", lambda request: redirect("accounts:landing"), name="root_redirect"),
 ]
