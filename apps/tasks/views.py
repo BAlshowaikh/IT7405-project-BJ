@@ -36,8 +36,6 @@ def get_task_for_user_or_404(user, public_id: str) -> Task:
     """
     Fetch a single task created by this user, matching the uniquli created public id.
     """
-    # You said: for now you only care about tasks created_by the user
-    # qs = Task.objects.filter(created_by=user)
     try:
         return Task.objects.get(created_by=user, public_id=public_id)
     except Task.DoesNotExist:
@@ -103,8 +101,6 @@ def serialize_task(task: Task):
     Convert a Task instance into a JSON-safe dict.
     This is what your frontend will receive.
     """
-    # raw_id = task.pk
-    # task_id = str(raw_id) if raw_id is not None else ""
     task_id = get_task_identifier(task)
 
     return {
@@ -163,7 +159,6 @@ def compute_task_stats(tasks):
 
 
 # --------------------- Views (controller) ----------------------------
-
 class DashboardView(LoginRequiredMixin, TemplateView):
     template_name = "tasks/dashboard.html"
 
@@ -249,7 +244,7 @@ class TaskCreateApiView(LoginRequiredMixin, View):
         else:
             due_date = None
 
-        # Create a task strictly owned by this user
+        # Create a task owned by the logged in user
         task = Task.objects.create(
             task_type=task_type,
             title=title,

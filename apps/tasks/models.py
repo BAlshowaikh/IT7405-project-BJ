@@ -5,7 +5,6 @@ import uuid
 
 User = get_user_model()
 
-
 class Task(models.Model):
     # This will generated a public id which will be used for details, edit and delete
     public_id = models.CharField(
@@ -98,16 +97,18 @@ class Task(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-
     class Meta:
         ordering = ["task_type", "status", "due_date", "-created_at"]
+        indexes = [
+            # Index to speed up "tasks for this user by status"
+            models.Index(fields=["created_by", "status"]),
+        ]
 
     def __str__(self):
         if self.project:
             return f"[{self.project.name}] {self.title}"
         return self.title
     
-
 
 class Tip(models.Model):
     user = models.ForeignKey(
@@ -122,6 +123,10 @@ class Tip(models.Model):
 
     class Meta:
         ordering = ["-created_at"]
+        indexes = [
+            # Index to speed up "tips for this user ordered by date"
+            models.Index(fields=["user", "created_at"]),
+        ]
 
     def __str__(self):
         return f"{self.category or 'Tip'}: {self.text[:40]}..."

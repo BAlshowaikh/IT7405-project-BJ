@@ -1,5 +1,6 @@
 from django.contrib import admin
-from .models import Task
+from .models import Task, Tip
 
-# Register the tasks model in admin portal
+# Register the task and tip model in admin portal
 admin.site.register(Task)
+admin.site.register(Tip)

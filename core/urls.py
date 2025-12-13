@@ -23,7 +23,4 @@ urlpatterns = [
     path("", landing_page, name="landing"), 
     path("accounts/", include("apps.accounts.urls")),
     path("tasks/", include("apps.tasks.urls")),
-
-
-    # path("", lambda request: redirect("accounts:landing"), name="root_redirect"),
 ]
