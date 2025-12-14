@@ -5,14 +5,16 @@
   class="flex h-screen w-64 flex-col bg-[#20222F] text-slate-100 border-r border-slate-800"
 >
   {# Top logo + app name #}
-  <div class="flex items-center gap-3 px-6 py-5 border-b border-slate-800">
-    <img
-      src="{% static 'images/cohub-logo.png' %}"
-      alt="CoHub logo"
-      class="h-8 w-8 rounded-lg bg-slate-700 object-cover"
-    />
-    <span class="text-xl font-semibold tracking-wide">CoHub</span>
-  </div>
+  <a href="{% url 'accounts:logout' %}">
+    <div class="flex items-center gap-3 px-6 py-5 border-b border-slate-800">
+      <img
+        src="{% static 'images/cohub-logo.png' %}"
+        alt="CoHub logo"
+        class="h-8 w-8 rounded-lg bg-slate-700 object-cover"
+      />
+      <span class="text-xl font-semibold tracking-wide">CoHub</span>
+    </div>
+  </a>
 
   {# Main nav links #}
   <nav class="mt-4 flex-1 flex flex-col gap-1 text-sm font-medium">
@@ -48,7 +50,7 @@
       class="text-lg
             {% if active_page == 'tips' %}text-slate-900{% else %}text-slate-300{% endif %}"
     ></iconify-icon>
-    <span>AI Tips</span>
+    <span>Tips</span>
   </a>
 
 
