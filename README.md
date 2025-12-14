@@ -43,6 +43,7 @@ This project was developed as part of a university coursework to demonstrate NoS
 
 ## 📁 Project Structure
 
+```
 COHUB/
 ├── apps/
 │   ├── accounts/        # Authentication & profile management
@@ -54,7 +55,7 @@ COHUB/
 ├── manage.py
 ├── requirements.txt
 └── README.md
-
+```
 ---
 
 ## 🧩 Architecture
@@ -72,21 +73,21 @@ Djongo enables Django models to map directly to MongoDB documents, allowing seam
 ## ⚙️ Setup & Installation
 
 ### 1. Clone the repository
-git clone https://github.com/your-username/cohub.git
-cd cohub
+git clone https://github.com/BAlshowaikh/IT7405-project-BJ.git
+cd IT7405-project-BJ
 
-### 2. Create & activate Conda environment
-conda create -n cohub_env python=3.x
-conda activate cohub_env
-
-### 3. Install dependencies
-pip install -r requirements.txt
-
-### 4. Configure environment variables
+### 2. Configure environment variables
 Create a .env file in the project root:
 
 MONGODB_ATLAS_URI=your_mongodb_atlas_uri
 MONGODB_LOCAL_URI=mongodb://localhost:27017/
+
+### 3. Create & activate Conda environment
+conda create -n cohub_env python=3.x
+conda activate cohub_env
+
+### 4. Install dependencies
+pip install -r requirements.txt
 
 ### 5. Run migrations
 python manage.py makemigrations
