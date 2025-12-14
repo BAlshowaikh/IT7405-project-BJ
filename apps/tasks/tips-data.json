@@ -14,5 +14,49 @@
   {
     "category": "wellbeing",
     "text": "Take a 5-minute break every hour to stretch and rest your eyes."
+  },
+  {
+    "category": "productivity",
+    "text": "Use time-blocking to dedicate specific hours to deep work."
+  },
+  {
+    "category": "focus",
+    "text": "Work in short, focused sessions like the Pomodoro technique."
+  },
+  {
+    "category": "planning",
+    "text": "Review your tasks at the end of the day and plan for tomorrow."
+  },
+  {
+    "category": "productivity",
+    "text": "Tackle the most difficult task first while your energy is high."
+  },
+  {
+    "category": "focus",
+    "text": "Set a clear goal before starting any task to avoid drifting."
+  },
+  {
+    "category": "wellbeing",
+    "text": "Stay hydrated and keep a water bottle near your workspace."
+  },
+  {
+    "category": "planning",
+    "text": "Break large goals into weekly and daily actionable steps."
+  },
+  {
+    "category": "productivity",
+    "text": "Batch similar tasks together to reduce context switching."
+  },
+  {
+    "category": "focus",
+    "text": "Silence non-essential notifications during work hours."
+  },
+  {
+    "category": "wellbeing",
+    "text": "Maintain a comfortable and clutter-free workspace."
+  },
+  {
+    "category": "planning",
+    "text": "Set realistic deadlines and leave buffer time for unexpected work."
   }
 ]
